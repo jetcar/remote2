@@ -1,0 +1,30 @@
+﻿<Window x:Class="remote.Explorer"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Explorer"
+        Background="Indigo"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        ShowInTaskbar="True"
+        SizeToContent="Manual">
+    <!--  WindowState="Maximized"  -->
+    <!--  WindowStyle="None"  -->
+    <DockPanel Margin="70">
+        <TextBlock Margin="5"
+                   DockPanel.Dock="Top"
+                   FontSize="50"
+                   FontWeight="Bold"
+                   Foreground="GhostWhite"
+                   Text="{Binding CurrentPath}" />
+        <ListView Name="ListView"
+                  Margin="5"
+                  Background="Indigo"
+                  DockPanel.Dock="Top"
+                  FontSize="50"
+                  FontWeight="Bold"
+                  Foreground="GhostWhite"
+                  ItemsSource="{Binding Files}"
+                  SelectedIndex="{Binding SelectedIndex}"
+                  SelectionChanged="ScrollIntoView" />
+
+    </DockPanel>
+</Window>
