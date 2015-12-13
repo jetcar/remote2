@@ -15,13 +15,23 @@ namespace remote
         public ButtonCommands()
         {
         }
-        public ButtonCommands(string name,string image,Action method)
+        public ButtonCommands(string name, string image, Action method, int timeout)
+        {
+            this.Timeout = timeout;
+            this.Name = name;
+            ImagePath = image;
+            this.Method = method;
+            RemoveCommand = new Command<string>(Remove_Click);
+        }
+        public ButtonCommands(string name, string image, Action method)
         {
             this.Name = name;
             ImagePath = image;
             this.Method = method;
             RemoveCommand = new Command<string>(Remove_Click);
         }
+        [XmlIgnore]
+        public int Timeout { get; set; }
 
         private void Remove_Click(string obj)
         {
@@ -91,6 +101,21 @@ namespace remote
         {
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private DateTime? _lastRun;
+        public void Run()
+        {
+            if (_lastRun == null)
+            {
+                _lastRun = DateTime.MinValue;
+            }
+            else if ((DateTime.Now - _lastRun).Value.TotalMilliseconds < Timeout)
+            {
+                return;
+            }
+            Method.Invoke();
+            _lastRun = DateTime.Now;
         }
     }
 }

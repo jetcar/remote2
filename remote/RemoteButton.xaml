@@ -4,8 +4,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:remote="clr-namespace:remote"
-             d:DesignHeight="300"
-             d:DesignWidth="300"
+             Height="80"
+             d:DesignWidth="100"
              mc:Ignorable="d">
     <DockPanel Name="MyButton">
         <Button Height="40"
@@ -19,11 +19,11 @@
             <ListView.ItemTemplate>
                 <DataTemplate>
                     <DockPanel>
-                        <Button Command="{Binding ElementName=MyButton,
+                        <Button Height="10"
+                                Command="{Binding ElementName=MyButton,
                                                   Path=DataContext.RemoveCommand}"
                                 CommandParameter="{Binding}"
                                 Content="X"
-                                Height="10"
                                 DockPanel.Dock="Right" />
                         <TextBlock DockPanel.Dock="Left" Text="{Binding}" />
 

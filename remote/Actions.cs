@@ -12,19 +12,25 @@ namespace remote
 {
     public class Actions
     {
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+
         [DllImport("User32.dll")]
         static extern int SetForegroundWindow(IntPtr point);
 
-        private static Explorer explorer = null;
+
+        public static IDirectory Directory { get; set; }
+        private static IExplorer explorer;
         static string player;
         static int screenIndex;
-        static string defaultPath;
         public static string CurrentPath;
         static Actions()
         {
+            Directory = new MyDirectory();
             player = ConfigurationManager.AppSettings["playerName"];
             screenIndex = Convert.ToInt32(ConfigurationManager.AppSettings["defaultScreenIndex"]);
-            defaultPath = ConfigurationManager.AppSettings["defaultPath"];
         }
 
 
@@ -109,21 +115,19 @@ namespace remote
                 p.Kill();
             }
 
-            var files = new List<string>(Directory.GetFiles(Explorer.currentDirectory));
-            var index = files.IndexOf(Explorer.currentfile);
+            var files = new List<string>(Directory.GetFiles(Explorer.CurrentDirectory));
+            var index = files.IndexOf(Explorer.Currentfile);
             if (index < files.Count - 1)
             {
                 index++;
             }
-            Explorer.currentfile = files[index];
-            var extension = Path.GetExtension(Explorer.currentfile);
+            Explorer.Currentfile = files[index];
+            var extension = Path.GetExtension(Explorer.Currentfile);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
-                Process.Start(Explorer.currentfile);
+                Process.Start(Explorer.Currentfile);
                 SendKey("f");
-
             }
-
         }
 
         public static void PreviousButton()
@@ -137,22 +141,19 @@ namespace remote
                 p.Kill();
             }
 
-            var files = new List<string>(Directory.GetFiles(Explorer.currentDirectory));
-            var index = files.IndexOf(Explorer.currentfile);
+            var files = new List<string>(Directory.GetFiles(Explorer.CurrentDirectory));
+            var index = files.IndexOf(Explorer.Currentfile);
             if (index > 0)
             {
                 index--;
             }
-            Explorer.currentfile = files[index];
-            var extension = Path.GetExtension(Explorer.currentfile);
+            Explorer.Currentfile = files[index];
+            var extension = Path.GetExtension(Explorer.Currentfile);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
-                Process.Start(Explorer.currentfile);
+                Process.Start(Explorer.Currentfile);
                 SendKey("f");
-
             }
-
-
         }
 
         public static void VolUpButton()
@@ -165,8 +166,23 @@ namespace remote
             SendKey("{DOWN}");
         }
 
+        public static void OptionsButton()
+        {
+            //SendKey("{DOWN}");
+        }
+
+       
+
         public static void SendKey(string key)
         {
+            Process currProcess = Process.GetCurrentProcess();
+            var currHandle = GetForegroundWindow();
+            var processes = Process.GetProcesses();
+            foreach (var process in processes)
+            {
+                if (currHandle == process.MainWindowHandle)
+                    currProcess = process;
+            }
             Process p = Process.GetProcessesByName(player).FirstOrDefault();
             if (p != null)
             {
@@ -175,7 +191,16 @@ namespace remote
                 SetForegroundWindow(h);
                 SendKeys.SendWait(key);
             }
+            try
+            {
+                currProcess.WaitForInputIdle();
+                SetForegroundWindow(currProcess.MainWindowHandle);
+            }
+            catch (Exception)
+            {
+            }
 
         }
+
     }
 }

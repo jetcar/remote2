@@ -5,21 +5,19 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         Title="MainWindow"
         Width="525"
+        Height="600"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
         ShowInTaskbar="False"
-        WindowState="Minimized"
-        Height="550"
-        DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    
+        WindowState="Minimized">
+
     <DockPanel Name="DockPanel">
         <tb:TaskbarIcon x:Name="myNotifyIcon"
-                    Visibility="Visible"
-                    ToolTipText="ir remote"
-                    DoubleClickCommand="{Binding TrayClick}"
-                    IconSource="/images/tray.ico"
-                    MenuActivation="LeftOrRightClick"
-                    PopupActivation="DoubleClick"
-                    
-      />
+                        DoubleClickCommand="{Binding TrayClick}"
+                        IconSource="/images/tray.ico"
+                        MenuActivation="LeftOrRightClick"
+                        PopupActivation="DoubleClick"
+                        ToolTipText="ir remote"
+                        Visibility="Visible" />
         <ComboBox DockPanel.Dock="Top"
                   ItemsSource="{Binding Ports}"
                   SelectedItem="{Binding PortTxt}" />
@@ -89,6 +87,9 @@
                                      Grid.Column="2"
                                      DataContext="{Binding NextButton}" />
             </Grid>
+
+
+
         </Grid>
     </DockPanel>
 </Window>

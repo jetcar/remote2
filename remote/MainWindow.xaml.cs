@@ -45,13 +45,24 @@ namespace remote
         public ButtonCommands PreviousButton { get; set; }
         public ButtonCommands VolUpButton { get; set; }
         public ButtonCommands VolDownButton { get; set; }
+        public ButtonCommands Options { get; set; }
+        public ButtonCommands Green { get; set; }
+        public ButtonCommands Yellow { get; set; }
+        public ButtonCommands Blue { get; set; }
         private IList<ButtonCommands> buttons = new List<ButtonCommands>();
-        IDictionary<string, Action> actions = new Dictionary<string, Action>();
+        IDictionary<string, ButtonCommands> actions = new Dictionary<string, ButtonCommands>();
         private void Add_click(ButtonCommands command)
         {
             command.Commands.Add(SelectedCode);
-            Save();
+            foreach (var buttonCommand in buttons)
+            {
+                foreach (var remotecommand in buttonCommand.Commands)
+                {
+                    actions[remotecommand] = buttonCommand;
+                }
+            }
 
+            Save();
         }
 
         protected override void OnStateChanged(EventArgs e)
@@ -67,7 +78,7 @@ namespace remote
         {
             TrayClick = new Command<string>(Tray_click);
             Power = new ButtonCommands("power", "power.png", Actions.Power);
-            OkButton = new ButtonCommands("ok", "ok.png", Actions.OkButton);
+            OkButton = new ButtonCommands("ok", "ok.png", Actions.OkButton,500);
             UpButton = new ButtonCommands("up", "up.png", Actions.UpButton);
 
             DownButton = new ButtonCommands("down", "down.png", Actions.DownButton);
@@ -76,11 +87,12 @@ namespace remote
 
             ExitButton = new ButtonCommands("exit", "exit.png", Actions.ExitButton);
             ListButton = new ButtonCommands("list", "list.png", Actions.ListButton);
-            NextButton = new ButtonCommands("next", "next.png", Actions.NextButton);
+            NextButton = new ButtonCommands("next", "next.png", Actions.NextButton,500);
 
-            PreviousButton = new ButtonCommands("previous", "previous.png", Actions.PreviousButton);
+            PreviousButton = new ButtonCommands("previous", "previous.png", Actions.PreviousButton,500);
             VolUpButton = new ButtonCommands("volUp", "volUp.png", Actions.VolUpButton);
             VolDownButton = new ButtonCommands("volDown", "volDown.png", Actions.VolDownButton);
+            Options = new ButtonCommands("options", "options.png", Actions.OptionsButton);
 
             buttons.Add(Power);
             buttons.Add(OkButton);
@@ -107,10 +119,9 @@ namespace remote
             {
                 foreach (var command in buttonCommand.Commands)
                 {
-                    actions[command] = buttonCommand.Method;
+                    actions[command] = buttonCommand;
                 }
             }
-
 
             InitializeComponent();
             AddCommand = new Command<ButtonCommands>(Add_click);
@@ -119,6 +130,7 @@ namespace remote
             {
                 PortTxt = Ports.First();
             }
+            this.Hide();
         }
 
         private void Tray_click(string obj)
@@ -131,10 +143,10 @@ namespace remote
 
         public void Save()
         {
-            XmlSerializer xsSubmit = new XmlSerializer(typeof(List<ButtonCommands>));
-            using (StringWriter sww = new StringWriter())
-            using (XmlWriter writer = XmlWriter.Create(sww))
-            using (StreamWriter swriter = new StreamWriter("config.xml"))
+            var xsSubmit = new XmlSerializer(typeof(List<ButtonCommands>));
+            using (var sww = new StringWriter())
+            using (var writer = XmlWriter.Create(sww))
+            using (var swriter = new StreamWriter("config.xml"))
             {
                 xsSubmit.Serialize(writer, buttons);
                 var xml = sww.ToString(); // Your XML
@@ -143,9 +155,9 @@ namespace remote
         }
         public List<ButtonCommands> Load()
         {
-            XmlSerializer xsSubmit = new XmlSerializer(typeof(List<ButtonCommands>));
-            using (StreamReader sww = new StreamReader("config.xml"))
-            using (XmlReader xrr = XmlReader.Create(sww))
+            var xsSubmit = new XmlSerializer(typeof(List<ButtonCommands>));
+            using (var sww = new StreamReader("config.xml"))
+            using (var xrr = XmlReader.Create(sww))
             {
                 return (List<ButtonCommands>)xsSubmit.Deserialize(xrr);
             }
@@ -277,7 +289,7 @@ namespace remote
             if (actions.ContainsKey(speedReading))
                 Dispatcher.Invoke(() =>
                 {
-                    actions[speedReading].Invoke();
+                    actions[speedReading].Run();
                 });
         }
 

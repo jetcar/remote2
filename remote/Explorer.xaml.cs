@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -16,29 +17,33 @@ namespace remote
     /// <summary>
     /// Interaction logic for Explorer.xaml
     /// </summary>
-    public partial class Explorer : INotifyPropertyChanged
+    public partial class Explorer : INotifyPropertyChanged,IExplorer
     {
         private string _currentPath;
         private ObservableCollection<string> _files = new ObservableCollection<string>();
         private int _selectedIndex;
-        public static string currentDirectory = Properties.Settings.Default.currentDirectory;
-        public static string currentfile = Properties.Settings.Default.currentfile;
+        public static string CurrentDirectory = Properties.Settings.Default.currentDirectory;
+        public static string Currentfile = Properties.Settings.Default.currentfile;
         public Explorer()
         {
+
+            Directory = new MyDirectory();
             if (!Directory.Exists(Properties.Settings.Default.currentDirectory))
-                currentDirectory = null;
-            CurrentPath = currentDirectory ?? ConfigurationManager.AppSettings["defaultPath"];
+                CurrentDirectory = null;
+            CurrentPath = CurrentDirectory ?? ConfigurationManager.AppSettings["defaultPath"];
 
             if (!File.Exists(Properties.Settings.Default.currentfile))
-                currentfile = null;
-            if (currentfile != null)
-                SelectedIndex = new List<string>(Directory.GetFiles(_currentPath)).IndexOf(currentfile) + 1;
+                Currentfile = null;
+            if (Currentfile != null)
+                SelectedIndex = new List<string>(Directory.GetFiles(_currentPath)).IndexOf(Currentfile) + 1 + Directory.GetDirectories(_currentPath).Count;
 
 
             Open(CurrentPath);
 
             InitializeComponent();
         }
+
+        public IDirectory Directory { get; set; }
 
         void Open(string currentPath)
         {
@@ -61,8 +66,8 @@ namespace remote
 
                     Files.Add(folders.Last());
                 }
-                currentDirectory = currentPath;
-                Properties.Settings.Default.currentDirectory = currentDirectory;
+                CurrentDirectory = currentPath;
+                Properties.Settings.Default.currentDirectory = CurrentDirectory;
                 Properties.Settings.Default.Save();
 
             }
@@ -89,15 +94,10 @@ namespace remote
 
                     this.Close();
                 }
-                currentfile = currentPath;
-                Properties.Settings.Default.currentfile = currentfile;
+                Currentfile = currentPath;
+                Properties.Settings.Default.currentfile = Currentfile;
                 Properties.Settings.Default.Save();
-
-
-
             }
-
-            //CurrentPath = currentPath;
         }
 
         public ObservableCollection<string> Files
@@ -154,6 +154,7 @@ namespace remote
                 SelectedIndex++;
         }
 
+
         public void OpenSelected()
         {
             if (SelectedIndex < 0)
@@ -169,7 +170,7 @@ namespace remote
             }
             else
             {
-                path = Path.Combine(currentDirectory, Files[SelectedIndex]);
+                path = Path.Combine(CurrentDirectory, Files[SelectedIndex]);
             }
             Open(path);
         }
