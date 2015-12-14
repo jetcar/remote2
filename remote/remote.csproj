@@ -88,15 +88,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="Explorer.xaml">
+    <Page Include="Views\Explorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="RemoteButton.xaml">
+    <Page Include="Views\RemoteButton.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainWindow.xaml">
+    <Page Include="Views\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -105,18 +105,24 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="IDirectory.cs" />
-    <Compile Include="IExplorer.cs" />
-    <Compile Include="MyDirectory.cs" />
-    <Compile Include="Explorer.xaml.cs">
+    <Compile Include="Services\category.cs" />
+    <Compile Include="Services\IDirectory.cs" />
+    <Compile Include="Services\IExplorer.cs" />
+    <Compile Include="Services\Impl\MyPlayer.cs" />
+    <Compile Include="Services\IPlayer.cs" />
+    <Compile Include="Services\IProcess.cs" />
+    <Compile Include="Services\Impl\MyDirectory.cs" />
+    <Compile Include="Services\PlayerStatus.cs" />
+    <Compile Include="Views\Explorer.xaml.cs">
       <DependentUpon>Explorer.xaml</DependentUpon>
     </Compile>
-    <Compile Include="RemoteButton.xaml.cs">
+    <Compile Include="Services\Impl\MyProcess.cs" />
+    <Compile Include="Views\RemoteButton.xaml.cs">
       <DependentUpon>RemoteButton.xaml</DependentUpon>
     </Compile>
     <Compile Include="ButtonCommands.cs" />
     <Compile Include="Command.cs" />
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="Views\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
@@ -146,7 +152,6 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
     <AppDesigner Include="Properties\" />
-    <None Include="remote_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
@@ -194,6 +199,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\options.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IoC\IoC.csproj">
+      <Project>{30B91521-9D60-44CE-BE51-34F56CFFD43E}</Project>
+      <Name>IoC</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

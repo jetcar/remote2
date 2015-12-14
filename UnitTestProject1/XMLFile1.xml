@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<root>
+
+  <fullscreen>false</fullscreen>
+  <aspectratio>default</aspectratio>
+  <audiodelay>0</audiodelay>
+  <apiversion>3</apiversion>
+  <currentplid>4</currentplid>
+  <time>4650</time>
+  <volume>123</volume>
+  <length>5445</length>
+  <random>false</random>
+  <audiofilters>
+    <filter_0></filter_0>
+  </audiofilters>
+  <rate>1</rate>
+  <videoeffects>
+    <hue>0</hue>
+    <saturation>1</saturation>
+    <contrast>1</contrast>
+    <brightness>1</brightness>
+    <gamma>1</gamma>
+  </videoeffects>
+  <state>paused</state>
+  <loop>false</loop>
+  <version>2.2.1 Terry Pratchett (Weatherwax)</version>
+  <position>0.8540027141571</position>
+  <repeat>false</repeat>
+  <subtitledelay>0</subtitledelay>
+  <equalizer></equalizer>
+  <information>
+    <category name="meta">
+      <info name='setting'> HAS_INDEX IS_INTERLEAVED</info>
+      <info name='filename'>Bare.2015.WEB-DLRip.avi</info>
+      <info name='Software'>VirtualDubMod 1.5.10.3 | www.virtualdub-fr.org || (build 2550/release)</info>
+    </category>
+    <category name='Stream 0'>
+      <info name='Display resolution'>720x304</info>
+      <info name='Type'>Video</info>
+      <info name='Frame rate'>23.975985</info>
+      <info name='Decoded format'>Planar 4:2:0 YUV</info>
+      <info name='Codec'>MPEG-4 Video (XVID)</info>
+      <info name='Resolution'>720x320</info>
+    </category>
+    <category name='Stream 1'>
+      <info name='Bitrate'>256 kb/s</info>
+      <info name='Type'>Audio</info>
+      <info name='Channels'>Stereo</info>
+      <info name='Sample rate'>44100 Hz</info>
+      <info name='Codec'>MPEG Audio layer 3 (mp3 )</info>
+    </category>
+  </information>
+  <stats>
+    <lostabuffers>8</lostabuffers>
+    <readpackets>1246</readpackets>
+    <lostpictures>6</lostpictures>
+    <demuxreadbytes>6650847</demuxreadbytes>
+    <demuxbitrate>1.3735139369965</demuxbitrate>
+    <playedabuffers>84</playedabuffers>
+    <demuxcorrupted>0</demuxcorrupted>
+    <sendbitrate>0</sendbitrate>
+    <sentbytes>0</sentbytes>
+    <displayedpictures>296</displayedpictures>
+    <demuxreadpackets>0</demuxreadpackets>
+    <sentpackets>0</sentpackets>
+    <inputbitrate>1.4826979637146</inputbitrate>
+    <demuxdiscontinuity>0</demuxdiscontinuity>
+    <averagedemuxbitrate>0</averagedemuxbitrate>
+    <decodedvideo>66</decodedvideo>
+    <averageinputbitrate>0</averageinputbitrate>
+    <readbytes>11697518</readbytes>
+    <decodedaudio>98</decodedaudio>
+  </stats>
+</root>

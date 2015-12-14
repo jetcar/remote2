@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Windows.Controls;
+using IoC;
 using remote.Annotations;
 using Path = System.IO.Path;
 
@@ -22,20 +23,19 @@ namespace remote
         private string _currentPath;
         private ObservableCollection<string> _files = new ObservableCollection<string>();
         private int _selectedIndex;
-        public static string CurrentDirectory = Properties.Settings.Default.currentDirectory;
-        public static string Currentfile = Properties.Settings.Default.currentfile;
+        public static string CURRENTDIRECTORY = Properties.Settings.Default.currentDirectory;
+        public static string CURRENTFILE = Properties.Settings.Default.currentfile;
         public Explorer()
         {
 
-            Directory = new MyDirectory();
             if (!Directory.Exists(Properties.Settings.Default.currentDirectory))
-                CurrentDirectory = null;
-            CurrentPath = CurrentDirectory ?? ConfigurationManager.AppSettings["defaultPath"];
+                CURRENTDIRECTORY = null;
+            CurrentPath = CURRENTDIRECTORY ?? ConfigurationManager.AppSettings["defaultPath"];
 
             if (!File.Exists(Properties.Settings.Default.currentfile))
-                Currentfile = null;
-            if (Currentfile != null)
-                SelectedIndex = new List<string>(Directory.GetFiles(_currentPath)).IndexOf(Currentfile) + 1 + Directory.GetDirectories(_currentPath).Count;
+                CURRENTFILE = null;
+            if (CURRENTFILE != null)
+                SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
 
 
             Open(CurrentPath);
@@ -43,8 +43,8 @@ namespace remote
             InitializeComponent();
         }
 
-        public IDirectory Directory { get; set; }
-
+        public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
+        public IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
         void Open(string currentPath)
         {
             bool isDirectory = false;
@@ -66,8 +66,8 @@ namespace remote
 
                     Files.Add(folders.Last());
                 }
-                CurrentDirectory = currentPath;
-                Properties.Settings.Default.currentDirectory = CurrentDirectory;
+                CURRENTDIRECTORY = currentPath;
+                Properties.Settings.Default.currentDirectory = CURRENTDIRECTORY;
                 Properties.Settings.Default.Save();
 
             }
@@ -90,14 +90,15 @@ namespace remote
 
                     Process.Start(currentPath);
 
-                    Actions.SendKey("f");
+                    Actions.Player.SetFullScreen();
 
                     this.Close();
                 }
-                Currentfile = currentPath;
-                Properties.Settings.Default.currentfile = Currentfile;
+                CURRENTFILE = currentPath;
+                Properties.Settings.Default.currentfile = CURRENTFILE;
                 Properties.Settings.Default.Save();
             }
+            CurrentPath = CURRENTDIRECTORY;
         }
 
         public ObservableCollection<string> Files
@@ -121,6 +122,8 @@ namespace remote
                 OnPropertyChanged();
             }
         }
+
+
 
         public string CurrentPath
         {
@@ -170,7 +173,7 @@ namespace remote
             }
             else
             {
-                path = Path.Combine(CurrentDirectory, Files[SelectedIndex]);
+                path = Path.Combine(CURRENTDIRECTORY, Files[SelectedIndex]);
             }
             Open(path);
         }

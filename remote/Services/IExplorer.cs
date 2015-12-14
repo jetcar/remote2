@@ -13,6 +13,7 @@ namespace remote
         double Left { get; set; }
         WindowState WindowState { get; set; }
         double Top { get; set; }
+        int SelectedIndex { get; set; }
         event EventHandler Closed;
     }
 }

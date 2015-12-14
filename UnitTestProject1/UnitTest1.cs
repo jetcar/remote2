@@ -1,5 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Xml;
+using System.Xml.Serialization;
+using IoC;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using remote;
+using remote.Services;
 
 namespace UnitTestProject1
 {
@@ -7,8 +15,36 @@ namespace UnitTestProject1
     public class UnitTest1
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TestActions()
         {
+            var directory = new Mock<IDirectory>();
+            var process = new Mock<IProcess>();
+            IocKernel.registeredServices[typeof(IProcess)] = process;
+            IocKernel.registeredServices[typeof(IDirectory)] = directory;
+            Actions.ListButton();
+            Assert.AreEqual(1,Actions.Explorer.SelectedIndex);
+            Actions.OkButton();
+            Assert.AreEqual(1, Actions.Explorer.SelectedIndex);
+
+            Actions.OkButton();
+        }
+
+        [TestMethod]
+        public void DeserializeXml()
+        {
+            var xsSubmit = new XmlSerializer(typeof(PlayerStatus));
+            using (var sww = new StreamReader("XMLFile1.xml"))
+            using (var xrr = XmlReader.Create(sww))
+            {
+                var status = (PlayerStatus)xsSubmit.Deserialize(xrr);
+                Assert.AreEqual(PlayerStatus.States.paused, status.state);
+                Assert.AreEqual(true, status.fullscreen);
+                Assert.AreEqual(125, status.volume);
+                Assert.AreEqual(3, status.information.Count);
+                Assert.AreEqual(3, status.information.Count);
+
+            }
+
         }
     }
 }

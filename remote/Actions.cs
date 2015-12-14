@@ -4,41 +4,50 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
+using IoC;
+using remote.Services;
 
 namespace remote
 {
     public class Actions
     {
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr GetForegroundWindow();
-
-
-        [DllImport("User32.dll")]
-        static extern int SetForegroundWindow(IntPtr point);
-
-
-        public static IDirectory Directory { get; set; }
-        private static IExplorer explorer;
-        static string player;
+        public static IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
+        public static IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
+        public static IExplorer Explorer { get; set; }
+        public static IPlayer Player { get { return IocKernel.GetInstance<IPlayer>(); } }
+        private static Timer timer;
+        static string playerName;
         static int screenIndex;
         public static string CurrentPath;
         static Actions()
         {
-            Directory = new MyDirectory();
-            player = ConfigurationManager.AppSettings["playerName"];
+            timer = new Timer();
+            timer.Interval = 500;
+            timer.Tick += timer_Tick;
+            timer.Start();
+            playerName = ConfigurationManager.AppSettings["playerName"];
             screenIndex = Convert.ToInt32(ConfigurationManager.AppSettings["defaultScreenIndex"]);
+        }
+
+        static void timer_Tick(object sender, EventArgs e)
+        {
+            PlayerStatus status = Player.GetStatus();
+            if(status == null)
+                timer.Stop();
         }
 
 
         public static void OkButton()
         {
-            SendKey(" ");
-            if(explorer != null)
-                explorer.OpenSelected();
+            PlayerStatus status = Player.GetStatus();
+            if(status.state != PlayerStatus.States.stopped)
+                Player.PlayPause();
+
+            else if(Explorer != null)
+                Explorer.OpenSelected();
         }
 
         public static void Power()
@@ -48,158 +57,127 @@ namespace remote
 
         public static void UpButton()
         {
-            if (explorer != null) explorer.MoveUp();
+            if (Explorer != null) Explorer.MoveUp();
         }
 
         public static void DownButton()
         {
-            if (explorer != null) explorer.MoveDown();
+            if (Explorer != null) Explorer.MoveDown();
         }
 
         public static void LeftButton()
         {
-            SendKey(",");
+            Player.Backward();
         }
 
         public static void RightButton()
         {
-            SendKey(".");
+            Player.Forward();
         }
 
         public static void ExitButton()
         {
-            Process p = Process.GetProcessesByName(player).FirstOrDefault();
+            Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {
-                p.Kill();
+                Process.Kill(p);
             }
-            if(explorer != null)
-                explorer.Close();
+            if(Explorer != null)
+                Explorer.Close();
         }
 
         public static void ListButton()
         {
 
-            Process p = Process.GetProcessesByName(player).FirstOrDefault();
+            Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {
-                p.Kill();
+                Process.Kill(p);
             }
-            if (explorer != null)
-                explorer.Close();
-            explorer = new Explorer();
-            explorer.Show();
-            explorer.Closed += explorer_Closed;
+            if (Explorer != null)
+                Explorer.Close();
+            Explorer = new Explorer();
+            Explorer.Show();
+            Explorer.Closed += explorer_Closed;
             Screen[] screens = Screen.AllScreens;
             var x = screens[screenIndex].WorkingArea.X;
             var y = screens[screenIndex].WorkingArea.Y;
-            explorer.Left = x;
-            explorer.Top = y;
-            explorer.WindowState = WindowState.Minimized;
-            explorer.WindowState = WindowState.Maximized;
+            Explorer.Left = x;
+            Explorer.Top = y;
+            Explorer.WindowState = WindowState.Minimized;
+            Explorer.WindowState = WindowState.Maximized;
 
         }
 
         static void explorer_Closed(object sender, EventArgs e)
         {
-            explorer = null;
+            Explorer = null;
         }
 
         public static void NextButton()
         {
-            if(explorer != null)
+            if(Explorer != null)
                 return;
-            Process p = Process.GetProcessesByName(player).FirstOrDefault();
+            Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {
-                p.Kill();
+                Process.Kill(p);
             }
 
-            var files = new List<string>(Directory.GetFiles(Explorer.CurrentDirectory));
-            var index = files.IndexOf(Explorer.Currentfile);
+            var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
+            var index = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY)).IndexOf(remote.Explorer.CURRENTFILE) + 1 + Directory.GetDirectories(remote.Explorer.CURRENTDIRECTORY).Count;
             if (index < files.Count - 1)
             {
                 index++;
             }
-            Explorer.Currentfile = files[index];
-            var extension = Path.GetExtension(Explorer.Currentfile);
+            remote.Explorer.CURRENTFILE = files[index];
+            var extension = Path.GetExtension(remote.Explorer.CURRENTFILE);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
-                Process.Start(Explorer.Currentfile);
-                SendKey("f");
+                Process.Start(remote.Explorer.CURRENTFILE);
+                Player.SetFullScreen();
             }
         }
 
         public static void PreviousButton()
         {
-            if (explorer != null)
+            if (Explorer != null)
                 return;
 
-            Process p = Process.GetProcessesByName(player).FirstOrDefault();
+            Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {
-                p.Kill();
+                Process.Kill(p);
             }
 
-            var files = new List<string>(Directory.GetFiles(Explorer.CurrentDirectory));
-            var index = files.IndexOf(Explorer.Currentfile);
+            var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
+            var index = files.IndexOf(remote.Explorer.CURRENTFILE);
             if (index > 0)
             {
                 index--;
             }
-            Explorer.Currentfile = files[index];
-            var extension = Path.GetExtension(Explorer.Currentfile);
+            remote.Explorer.CURRENTFILE = files[index];
+            var extension = Path.GetExtension(remote.Explorer.CURRENTFILE);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
-                Process.Start(Explorer.Currentfile);
-                SendKey("f");
+                Process.Start(remote.Explorer.CURRENTFILE);
+                Player.SetFullScreen();
             }
         }
 
         public static void VolUpButton()
         {
-            SendKey("{UP}");
+            Player.VolUp();
         }
 
         public static void VolDownButton()
         {
-            SendKey("{DOWN}");
+            Player.VolDown();
         }
 
         public static void OptionsButton()
         {
             //SendKey("{DOWN}");
-        }
-
-       
-
-        public static void SendKey(string key)
-        {
-            Process currProcess = Process.GetCurrentProcess();
-            var currHandle = GetForegroundWindow();
-            var processes = Process.GetProcesses();
-            foreach (var process in processes)
-            {
-                if (currHandle == process.MainWindowHandle)
-                    currProcess = process;
-            }
-            Process p = Process.GetProcessesByName(player).FirstOrDefault();
-            if (p != null)
-            {
-                p.WaitForInputIdle();
-                IntPtr h = p.MainWindowHandle;
-                SetForegroundWindow(h);
-                SendKeys.SendWait(key);
-            }
-            try
-            {
-                currProcess.WaitForInputIdle();
-                SetForegroundWindow(currProcess.MainWindowHandle);
-            }
-            catch (Exception)
-            {
-            }
-
         }
 
     }
