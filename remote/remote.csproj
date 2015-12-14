@@ -112,7 +112,7 @@
     <Compile Include="Services\IPlayer.cs" />
     <Compile Include="Services\IProcess.cs" />
     <Compile Include="Services\Impl\MyDirectory.cs" />
-    <Compile Include="Services\PlayerStatus.cs" />
+    <Compile Include="Services\Impl\PlayerStatus.cs" />
     <Compile Include="Views\Explorer.xaml.cs">
       <DependentUpon>Explorer.xaml</DependentUpon>
     </Compile>
