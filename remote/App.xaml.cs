@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using IoC;
+using remote.Services;
+using remote.Services.Impl;
 
 namespace remote
 {
@@ -12,6 +14,7 @@ namespace remote
         {
             IocKernel.registeredServices[typeof(IProcess)] = new MyProcess();
             IocKernel.registeredServices[typeof(IDirectory)] = new MyDirectory();
+            IocKernel.registeredServices[typeof(IPlayer)] = new MyPlayer();
 
             base.OnStartup(e);
         }

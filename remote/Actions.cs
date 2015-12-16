@@ -35,19 +35,21 @@ namespace remote
         static void timer_Tick(object sender, EventArgs e)
         {
             PlayerStatus status = Player.GetStatus();
-            if(status == null)
+            if (status == null)
                 timer.Stop();
         }
 
 
         public static void OkButton()
         {
-            PlayerStatus status = Player.GetStatus();
-            if(status.state != PlayerStatus.States.stopped)
-                Player.PlayPause();
-
-            else if(Explorer != null)
+            if (Explorer != null)
                 Explorer.OpenSelected();
+            else
+            {
+                PlayerStatus status = Player.GetStatus();
+                if (status != null && status.state != PlayerStatus.States.stopped)
+                    Player.PlayPause();
+            }
         }
 
         public static void Power()
@@ -81,8 +83,10 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
+                timer.Stop();
+
             }
-            if(Explorer != null)
+            if (Explorer != null)
                 Explorer.Close();
         }
 
@@ -93,6 +97,8 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
+                timer.Stop();
+
             }
             if (Explorer != null)
                 Explorer.Close();
@@ -107,6 +113,7 @@ namespace remote
             Explorer.WindowState = WindowState.Minimized;
             Explorer.WindowState = WindowState.Maximized;
 
+
         }
 
         static void explorer_Closed(object sender, EventArgs e)
@@ -116,12 +123,13 @@ namespace remote
 
         public static void NextButton()
         {
-            if(Explorer != null)
+            if (Explorer != null)
                 return;
             Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {
                 Process.Kill(p);
+                timer.Stop();
             }
 
             var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
@@ -136,6 +144,7 @@ namespace remote
             {
                 Process.Start(remote.Explorer.CURRENTFILE);
                 Player.SetFullScreen();
+                timer.Start();
             }
         }
 
@@ -148,6 +157,8 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
+                timer.Stop();
+
             }
 
             var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
@@ -162,6 +173,8 @@ namespace remote
             {
                 Process.Start(remote.Explorer.CURRENTFILE);
                 Player.SetFullScreen();
+                timer.Start();
+
             }
         }
 

@@ -163,6 +163,8 @@ namespace remote
             if (SelectedIndex < 0)
                 return;
             string path;
+            if (SelectedIndex >= Files.Count)
+                SelectedIndex = Files.Count - 1;
             if (Files[SelectedIndex] == "..")
             {
                 var folders = CurrentPath.Split(Path.DirectorySeparatorChar);

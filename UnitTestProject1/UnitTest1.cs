@@ -30,6 +30,7 @@ namespace UnitTestProject1
         }
 
         [TestMethod]
+        [DeploymentItem("XMLFile1.xml")]
         public void DeserializeXml()
         {
             var xsSubmit = new XmlSerializer(typeof(PlayerStatus));
@@ -38,10 +39,11 @@ namespace UnitTestProject1
             {
                 var status = (PlayerStatus)xsSubmit.Deserialize(xrr);
                 Assert.AreEqual(PlayerStatus.States.paused, status.state);
-                Assert.AreEqual(true, status.fullscreen);
-                Assert.AreEqual(125, status.volume);
-                Assert.AreEqual(3, status.information.Count);
-                Assert.AreEqual(3, status.information.Count);
+                Assert.AreEqual(false, status.fullscreen);
+                Assert.AreEqual(123, status.volume);
+                Assert.AreEqual(0.8540027141571, status.position);
+//                Assert.AreEqual(3, status.information.Count);
+//                Assert.AreEqual(3, status.information.Count);
 
             }
 
