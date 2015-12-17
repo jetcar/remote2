@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -24,6 +29,7 @@ namespace remote.Services.Impl
             try
             {
                 WebRequest request = WebRequest.Create(url + param);
+                Console.WriteLine(url + param);
                 request.Headers.Add("Authorization", auth);
                 WebResponse response = request.GetResponse();
                 var stream = new StreamReader(response.GetResponseStream());
@@ -33,13 +39,11 @@ namespace remote.Services.Impl
                 using (var sww = new StringReader(responceStr))
                 using (var xrr = XmlReader.Create(sww))
                 {
+
                     var status = (PlayerStatus)xsSubmit.Deserialize(xrr);
-                    lock (positionLocker)
+                    if (string.IsNullOrEmpty(param))
                     {
                         position = status.position;
-                    }
-                    lock (volLocker)
-                    {
                         volume = status.volume;
                     }
                     return status;
@@ -68,7 +72,7 @@ namespace remote.Services.Impl
             lock (positionLocker)
             {
                 position += 0.01;
-                SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)position));
+                SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
             }
         }
 
@@ -77,14 +81,44 @@ namespace remote.Services.Impl
             lock (positionLocker)
             {
                 position -= 0.01;
-                SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)position));
+                SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
             }
         }
 
         public void SetFullScreen()
         {
+            const short SWP_NOSIZE = 1;
+            const short SWP_ASYNCWINDOWPOS = 0x4000;
+            const int SWP_SHOWWINDOW = 0x0040;
+            string playerName = ConfigurationManager.AppSettings["playerName"];
+            var screenIndex = Convert.ToInt32(ConfigurationManager.AppSettings["defaultScreenIndex"]);
+            Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
+            if (p != null)
+            {
+                IntPtr handle = p.MainWindowHandle;
+                if (handle != IntPtr.Zero)
+                {
+                    Screen[] screens = Screen.AllScreens;
+                    var x = screens[screenIndex].WorkingArea.X;
+                    var y = screens[screenIndex].WorkingArea.Y;
+
+                    //Thread.Sleep(100);
+
+                    //SetWindowPos(handle, 0, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
+                    Thread.Sleep(100);
+                    SetWindowPos(handle, 0, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
+                }
+
+
+            }
+            Thread.Sleep(100);
+
             SendRequestGetStatus("?command=fullscreen");
         }
+        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
+
+
 
         public void VolUp()
         {

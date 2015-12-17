@@ -31,6 +31,7 @@ namespace remote
         private string _selectedCodes;
         private IList<ButtonCommands> _commands = new List<ButtonCommands>();
         public ButtonCommands Power { get; set; }
+        IActions Actions { get { return IoC.IocKernel.GetInstance<IActions>(); } }
         public ButtonCommands OkButton { get; set; }
         public ButtonCommands UpButton { get; set; }
 

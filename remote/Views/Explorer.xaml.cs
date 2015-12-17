@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Windows.Controls;
 using IoC;
 using remote.Annotations;
@@ -89,6 +90,17 @@ namespace remote
                     }
 
                     Process.Start(currentPath);
+                    var playerName = ConfigurationManager.AppSettings["playerName"];
+                    p = Process.GetProcessesByName(playerName).FirstOrDefault();
+                    while (p == null)
+                    {
+                        Thread.Sleep(10);
+                        p = Process.GetProcessesByName(playerName).FirstOrDefault();
+                    }
+                    while (p.MainWindowHandle == (IntPtr)0)
+                    {
+                        Thread.Sleep(10);
+                    }
 
                     Actions.Player.SetFullScreen();
 
@@ -100,6 +112,7 @@ namespace remote
             }
             CurrentPath = CURRENTDIRECTORY;
         }
+        IActions Actions { get { return IoC.IocKernel.GetInstance<IActions>(); } }
 
         public ObservableCollection<string> Files
         {

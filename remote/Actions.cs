@@ -4,25 +4,27 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using IoC;
 using remote.Services;
+using Timer = System.Windows.Forms.Timer;
 
 namespace remote
 {
-    public class Actions
+    public class Actions : IActions
     {
-        public static IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
-        public static IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
-        public static IExplorer Explorer { get; set; }
-        public static IPlayer Player { get { return IocKernel.GetInstance<IPlayer>(); } }
-        private static Timer timer;
+        public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
+        public IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
+        public IExplorer Explorer { get; set; }
+        public IPlayer Player { get { return IocKernel.GetInstance<IPlayer>(); } }
+        private Timer timer;
         static string playerName;
         static int screenIndex;
         public static string CurrentPath;
-        static Actions()
+        public Actions()
         {
             timer = new Timer();
             timer.Interval = 500;
@@ -32,7 +34,7 @@ namespace remote
             screenIndex = Convert.ToInt32(ConfigurationManager.AppSettings["defaultScreenIndex"]);
         }
 
-        static void timer_Tick(object sender, EventArgs e)
+        void timer_Tick(object sender, EventArgs e)
         {
             PlayerStatus status = Player.GetStatus();
             if (status == null)
@@ -40,7 +42,7 @@ namespace remote
         }
 
 
-        public static void OkButton()
+        public void OkButton()
         {
             if (Explorer != null)
                 Explorer.OpenSelected();
@@ -52,32 +54,46 @@ namespace remote
             }
         }
 
-        public static void Power()
+        public void Power()
         {
             //throw new NotImplementedException();
         }
 
-        public static void UpButton()
+        public void UpButton()
         {
-            if (Explorer != null) Explorer.MoveUp();
+            if (Explorer != null)
+            {
+                timer.Stop();
+                Explorer.MoveUp();
+                timer.Start();
+            }
         }
 
-        public static void DownButton()
+        public void DownButton()
         {
-            if (Explorer != null) Explorer.MoveDown();
+            if (Explorer != null)
+            {
+                timer.Stop();
+                Explorer.MoveDown();
+                timer.Start();
+            }
         }
 
-        public static void LeftButton()
+        public void LeftButton()
         {
+            timer.Stop();
             Player.Backward();
+            timer.Start();
         }
 
-        public static void RightButton()
+        public void RightButton()
         {
+            timer.Stop();
             Player.Forward();
+            timer.Start();
         }
 
-        public static void ExitButton()
+        public void ExitButton()
         {
             Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
@@ -90,7 +106,7 @@ namespace remote
                 Explorer.Close();
         }
 
-        public static void ListButton()
+        public void ListButton()
         {
 
             Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
@@ -116,12 +132,12 @@ namespace remote
 
         }
 
-        static void explorer_Closed(object sender, EventArgs e)
+        void explorer_Closed(object sender, EventArgs e)
         {
             Explorer = null;
         }
 
-        public static void NextButton()
+        public void NextButton()
         {
             if (Explorer != null)
                 return;
@@ -143,12 +159,23 @@ namespace remote
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
                 Process.Start(remote.Explorer.CURRENTFILE);
+                p = Process.GetProcessesByName(playerName).FirstOrDefault();
+                while (p == null)
+                {
+                    Thread.Sleep(10);
+                    p = Process.GetProcessesByName(playerName).FirstOrDefault();
+                }
+                while (p.MainWindowHandle == (IntPtr) 0)
+                {
+                    Thread.Sleep(10);
+                }
+
                 Player.SetFullScreen();
                 timer.Start();
             }
         }
 
-        public static void PreviousButton()
+        public void PreviousButton()
         {
             if (Explorer != null)
                 return;
@@ -172,26 +199,55 @@ namespace remote
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
                 Process.Start(remote.Explorer.CURRENTFILE);
+                p = Process.GetProcessesByName(playerName).FirstOrDefault();
+                while (p == null)
+                {
+                    Thread.Sleep(10);
+                    p = Process.GetProcessesByName(playerName).FirstOrDefault();
+                }
+                while (p.MainWindowHandle == (IntPtr)0)
+                {
+                    Thread.Sleep(10);
+                }
                 Player.SetFullScreen();
                 timer.Start();
 
             }
         }
 
-        public static void VolUpButton()
+        public void VolUpButton()
         {
             Player.VolUp();
         }
 
-        public static void VolDownButton()
+        public void VolDownButton()
         {
             Player.VolDown();
         }
 
-        public static void OptionsButton()
+        public void OptionsButton()
         {
             //SendKey("{DOWN}");
         }
 
+    }
+
+    public interface IActions
+    {
+        void Power();
+        void OkButton();
+        void UpButton();
+        void DownButton();
+        void LeftButton();
+        void RightButton();
+        void ExitButton();
+        void ListButton();
+        void NextButton();
+        void PreviousButton();
+        void VolUpButton();
+        void VolDownButton();
+        void OptionsButton();
+        IPlayer Player { get; }
+        IExplorer Explorer { get; set; }
     }
 }

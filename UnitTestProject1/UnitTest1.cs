@@ -21,6 +21,7 @@ namespace UnitTestProject1
             var process = new Mock<IProcess>();
             IocKernel.registeredServices[typeof(IProcess)] = process;
             IocKernel.registeredServices[typeof(IDirectory)] = directory;
+            IActions Actions = new Actions();
             Actions.ListButton();
             Assert.AreEqual(1,Actions.Explorer.SelectedIndex);
             Actions.OkButton();
