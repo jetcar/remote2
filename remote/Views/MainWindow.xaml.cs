@@ -69,9 +69,11 @@ namespace remote
         protected override void OnStateChanged(EventArgs e)
         {
             base.OnStateChanged(e);
-            if (this.WindowState == WindowState.Minimized)
+            if (WindowState == WindowState.Minimized)
             {
-                this.Hide();
+                Hide();
+                ShowInTaskbar = false;
+
             }
         }
 
@@ -131,15 +133,20 @@ namespace remote
             {
                 PortTxt = Ports.First();
             }
-            this.Hide();
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            Hide();
         }
 
         private void Tray_click(string obj)
         {
-            this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            this.Show();
-            this.WindowState = WindowState.Maximized;
-            this.WindowState = WindowState.Normal;
+            Show();
+            WindowState = WindowState.Maximized;
+            WindowState = WindowState.Normal;
+            ShowInTaskbar = true;
         }
 
         public void Save()

@@ -12,8 +12,8 @@
 
     <DockPanel Name="DockPanel">
         <tb:TaskbarIcon x:Name="myNotifyIcon"
-                        DoubleClickCommand="{Binding TrayClick}"
                         IconSource="/images/tray.ico"
+                        LeftClickCommand="{Binding TrayClick}"
                         MenuActivation="LeftOrRightClick"
                         PopupActivation="DoubleClick"
                         ToolTipText="ir remote"

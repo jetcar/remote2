@@ -102,18 +102,22 @@ namespace remote.Services.Impl
                     var x = screens[screenIndex].WorkingArea.X;
                     var y = screens[screenIndex].WorkingArea.Y;
 
-                    //Thread.Sleep(100);
 
-                    //SetWindowPos(handle, 0, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
-                    Thread.Sleep(100);
+                    SetWindowPos(handle, 0, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
                     SetWindowPos(handle, 0, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
                 }
 
 
             }
-            Thread.Sleep(100);
 
-            SendRequestGetStatus("?command=fullscreen");
+
+            var status = SendRequestGetStatus("?command=fullscreen");
+            while (!status.fullscreen)
+            {
+                status = SendRequestGetStatus("?command=fullscreen");
+                Thread.Sleep(100);
+            }
+
         }
         [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
         public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);

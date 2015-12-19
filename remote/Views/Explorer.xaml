@@ -2,12 +2,13 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Explorer"
-        Background="Indigo"
+        Background="#364E6F"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
         ShowInTaskbar="True"
         SizeToContent="Manual">
     <!--  WindowState="Maximized"  -->
     <!--  WindowStyle="None"  -->
+
     <DockPanel Margin="70">
         <TextBlock Margin="5"
                    DockPanel.Dock="Top"
@@ -17,7 +18,7 @@
                    Text="{Binding CurrentPath}" />
         <ListView Name="ListView"
                   Margin="5"
-                  Background="Indigo"
+                  Background="#364E6F"
                   DockPanel.Dock="Top"
                   FontSize="50"
                   FontWeight="Bold"

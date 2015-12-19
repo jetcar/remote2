@@ -97,7 +97,7 @@ namespace remote
                         Thread.Sleep(10);
                         p = Process.GetProcessesByName(playerName).FirstOrDefault();
                     }
-                    while (p.MainWindowHandle == (IntPtr)0)
+                    while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                     {
                         Thread.Sleep(10);
                     }

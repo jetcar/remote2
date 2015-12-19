@@ -38,7 +38,16 @@ namespace remote
         {
             PlayerStatus status = Player.GetStatus();
             if (status == null)
+            {
                 timer.Stop();
+                ListButton();
+            }
+            else if (status.state == PlayerStatus.States.stopped)
+            {
+                timer.Stop();
+                ListButton();
+
+            }
         }
 
 
@@ -63,9 +72,7 @@ namespace remote
         {
             if (Explorer != null)
             {
-                timer.Stop();
                 Explorer.MoveUp();
-                timer.Start();
             }
         }
 
@@ -73,9 +80,7 @@ namespace remote
         {
             if (Explorer != null)
             {
-                timer.Stop();
                 Explorer.MoveDown();
-                timer.Start();
             }
         }
 
@@ -165,7 +170,7 @@ namespace remote
                     Thread.Sleep(10);
                     p = Process.GetProcessesByName(playerName).FirstOrDefault();
                 }
-                while (p.MainWindowHandle == (IntPtr) 0)
+                while (!p.HasExited && p.MainWindowHandle == (IntPtr) 0)
                 {
                     Thread.Sleep(10);
                 }
@@ -205,7 +210,7 @@ namespace remote
                     Thread.Sleep(10);
                     p = Process.GetProcessesByName(playerName).FirstOrDefault();
                 }
-                while (p.MainWindowHandle == (IntPtr)0)
+                while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                 {
                     Thread.Sleep(10);
                 }
