@@ -100,19 +100,23 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Actions.cs" />
+    <Compile Include="Services\Impl\MyDispatcher.cs" />
+    <Compile Include="Services\Impl\Actions.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Services\IActions.cs" />
     <Compile Include="Services\category.cs" />
     <Compile Include="Services\IDirectory.cs" />
     <Compile Include="Services\IExplorer.cs" />
+    <Compile Include="Services\IDispatcher.cs" />
     <Compile Include="Services\Impl\MyPlayer.cs" />
     <Compile Include="Services\IPlayer.cs" />
     <Compile Include="Services\IProcess.cs" />
     <Compile Include="Services\Impl\MyDirectory.cs" />
     <Compile Include="Services\Impl\PlayerStatus.cs" />
+    <Compile Include="Services\SynchronizedObservableCollection`1.cs" />
     <Compile Include="Views\Explorer.xaml.cs">
       <DependentUpon>Explorer.xaml</DependentUpon>
     </Compile>

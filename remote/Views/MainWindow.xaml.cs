@@ -10,6 +10,7 @@ using System.Threading;
 using System.Windows;
 using System.Xml;
 using System.Xml.Serialization;
+using IoC;
 using remote.Annotations;
 
 namespace remote
@@ -26,7 +27,7 @@ namespace remote
         private string _portTxt;
         private Visibility _onlineVisibility = Visibility.Collapsed;
         private Visibility _offlineVisibility = Visibility.Visible;
-        private ObservableCollection<string> _lines = new ObservableCollection<string>();
+        private SynchronizedObservableCollection<string> _lines = new SynchronizedObservableCollection<string>();
         private Command<ButtonCommands> _addCommand;
         private string _selectedCodes;
         private IList<ButtonCommands> _commands = new List<ButtonCommands>();
@@ -46,7 +47,6 @@ namespace remote
         public ButtonCommands PreviousButton { get; set; }
         public ButtonCommands VolUpButton { get; set; }
         public ButtonCommands VolDownButton { get; set; }
-        public ButtonCommands Options { get; set; }
         public ButtonCommands Green { get; set; }
         public ButtonCommands Yellow { get; set; }
         public ButtonCommands Blue { get; set; }
@@ -81,7 +81,7 @@ namespace remote
         {
             TrayClick = new Command<string>(Tray_click);
             Power = new ButtonCommands("power", "power.png", Actions.Power);
-            OkButton = new ButtonCommands("ok", "ok.png", Actions.OkButton,500);
+            OkButton = new ButtonCommands("ok", "ok.png", Actions.OkButton, 500);
             UpButton = new ButtonCommands("up", "up.png", Actions.UpButton);
 
             DownButton = new ButtonCommands("down", "down.png", Actions.DownButton);
@@ -90,12 +90,11 @@ namespace remote
 
             ExitButton = new ButtonCommands("exit", "exit.png", Actions.ExitButton);
             ListButton = new ButtonCommands("list", "list.png", Actions.ListButton);
-            NextButton = new ButtonCommands("next", "next.png", Actions.NextButton,500);
+            NextButton = new ButtonCommands("next", "next.png", Actions.NextButton, 500);
 
-            PreviousButton = new ButtonCommands("previous", "previous.png", Actions.PreviousButton,500);
+            PreviousButton = new ButtonCommands("previous", "previous.png", Actions.PreviousButton, 500);
             VolUpButton = new ButtonCommands("volUp", "volUp.png", Actions.VolUpButton);
             VolDownButton = new ButtonCommands("volDown", "volDown.png", Actions.VolDownButton);
-            Options = new ButtonCommands("options", "options.png", Actions.OptionsButton);
 
             buttons.Add(Power);
             buttons.Add(OkButton);
@@ -139,6 +138,8 @@ namespace remote
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Hide();
+            IocKernel.GetInstance<IDispatcher>().SetDispatcher(Dispatcher);
+
         }
 
         private void Tray_click(string obj)
@@ -154,17 +155,26 @@ namespace remote
             var xsSubmit = new XmlSerializer(typeof(List<ButtonCommands>));
             using (var sww = new StringWriter())
             using (var writer = XmlWriter.Create(sww))
-            using (var swriter = new StreamWriter("config.xml"))
             {
                 xsSubmit.Serialize(writer, buttons);
                 var xml = sww.ToString(); // Your XML
-                swriter.Write(xml);
+                Properties.Settings.Default.config = xml;
+                Properties.Settings.Default.Save();
+
             }
         }
         public List<ButtonCommands> Load()
         {
+            var configvalue = Properties.Settings.Default.config;
+            if (string.IsNullOrEmpty(configvalue))
+            {
+                using (var reader = new StreamReader("config.xml"))
+                {
+                    configvalue = reader.ReadToEnd();
+                }
+            }
             var xsSubmit = new XmlSerializer(typeof(List<ButtonCommands>));
-            using (var sww = new StreamReader("config.xml"))
+            using (var sww = new StringReader(configvalue))
             using (var xrr = XmlReader.Create(sww))
             {
                 return (List<ButtonCommands>)xsSubmit.Deserialize(xrr);
@@ -275,12 +285,9 @@ namespace remote
                         speedReading = speedReading.Replace("\r", "");
                         if (!string.IsNullOrEmpty(speedReading.Trim()))
                             HandleRemoteCode(speedReading);
-                        Dispatcher.Invoke(() =>
-                        {
-                            if (!string.IsNullOrEmpty(speedReading.Trim()))
-                                Lines.Insert(0, speedReading);
+                        if (!string.IsNullOrEmpty(speedReading.Trim()))
+                            Lines.Insert(0, speedReading);
 
-                        });
                     }
                     catch (Exception)
                     {
@@ -295,14 +302,13 @@ namespace remote
         private void HandleRemoteCode(string speedReading)
         {
             if (actions.ContainsKey(speedReading))
-                Dispatcher.Invoke(() =>
-                {
-                    actions[speedReading].Run();
-                });
+            {
+                actions[speedReading].Run();
+            }
         }
 
 
-        public ObservableCollection<String> Lines
+        public SynchronizedObservableCollection<String> Lines
         {
             get { return _lines; }
             set { _lines = value; }

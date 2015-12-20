@@ -21,8 +21,10 @@ namespace remote.Services.Impl
         private string auth = "Basic OnFxcXFxcQ==";
         private double position = 0;
         private int volume = 0;
-        object volLocker = new object();
-        object positionLocker = new object();
+
+        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
+        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
+
 
         PlayerStatus SendRequestGetStatus(string param)
         {
@@ -31,28 +33,37 @@ namespace remote.Services.Impl
                 WebRequest request = WebRequest.Create(url + param);
                 Console.WriteLine(url + param);
                 request.Headers.Add("Authorization", auth);
-                WebResponse response = request.GetResponse();
-                var stream = new StreamReader(response.GetResponseStream());
-                var responceStr = stream.ReadToEnd();
-                stream.Close();
-                var xsSubmit = new XmlSerializer(typeof(PlayerStatus));
-                using (var sww = new StringReader(responceStr))
-                using (var xrr = XmlReader.Create(sww))
+                using (var response = (HttpWebResponse)request.GetResponse())
                 {
-
-                    var status = (PlayerStatus)xsSubmit.Deserialize(xrr);
-                    if (string.IsNullOrEmpty(param))
+                    var stream = new StreamReader(response.GetResponseStream());
+                    var responceStr = stream.ReadToEnd();
+                    stream.Close();
+                    var xsSubmit = new XmlSerializer(typeof(PlayerStatus));
+                    using (var sww = new StringReader(responceStr))
+                    using (var xrr = XmlReader.Create(sww))
                     {
-                        position = status.position;
-                        volume = status.volume;
+
+                        var status = (PlayerStatus)xsSubmit.Deserialize(xrr);
+                        if (string.IsNullOrEmpty(param))
+                        {
+                            position = (int)(status.position * 100) / 100.0;
+                            volume = status.volume;
+                        }
+                        Console.Write(status.position + " ");
+                        Console.Write(position + " ");
+                        Console.Write(status.state + " ");
+                        Console.Write(volume + " ");
+                        Console.WriteLine(status.fullscreen);
+
+                        return status;
                     }
-                    return status;
+
                 }
 
             }
             catch (Exception e)
             {
-
+                Console.WriteLine(e.Message);
             }
             return null;
         }
@@ -69,20 +80,14 @@ namespace remote.Services.Impl
 
         public void Forward()
         {
-            lock (positionLocker)
-            {
-                position += 0.01;
-                SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
-            }
+            position += 0.01;
+            SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
         }
 
         public void Backward()
         {
-            lock (positionLocker)
-            {
-                position -= 0.01;
-                SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
-            }
+            position -= 0.01;
+            SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
         }
 
         public void SetFullScreen()
@@ -102,14 +107,10 @@ namespace remote.Services.Impl
                     var x = screens[screenIndex].WorkingArea.X;
                     var y = screens[screenIndex].WorkingArea.Y;
 
-
                     SetWindowPos(handle, 0, 0, 0, 100, 100, SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
                     SetWindowPos(handle, 0, x, y, 0, 0, SWP_NOSIZE | SWP_SHOWWINDOW | SWP_ASYNCWINDOWPOS);
                 }
-
-
             }
-
 
             var status = SendRequestGetStatus("?command=fullscreen");
             while (!status.fullscreen)
@@ -119,27 +120,17 @@ namespace remote.Services.Impl
             }
 
         }
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-        public static extern IntPtr SetWindowPos(IntPtr hWnd, int hWndInsertAfter, int x, int Y, int cx, int cy, int wFlags);
-
-
 
         public void VolUp()
         {
-            lock (volLocker)
-            {
-                volume += 5;
-                SendRequestGetStatus("?command=volume&val=" + volume);
-            }
+            volume += 5;
+            SendRequestGetStatus("?command=volume&val=" + volume);
         }
 
         public void VolDown()
         {
-            lock (volLocker)
-            {
-                volume -= 5;
-                SendRequestGetStatus("?command=volume&val=" + volume);
-            }
+            volume -= 5;
+            SendRequestGetStatus("?command=volume&val=" + volume);
         }
     }
 }

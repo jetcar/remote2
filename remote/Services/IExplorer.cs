@@ -5,7 +5,7 @@ namespace remote
 {
     public interface IExplorer
     {
-        void OpenSelected();
+        bool OpenSelected();
         void MoveUp();
         void MoveDown();
         void Close();

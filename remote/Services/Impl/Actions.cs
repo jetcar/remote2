@@ -20,46 +20,63 @@ namespace remote
         public IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
         public IExplorer Explorer { get; set; }
         public IPlayer Player { get { return IocKernel.GetInstance<IPlayer>(); } }
-        private Timer timer;
+        public IDispatcher Dispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
         static string playerName;
         static int screenIndex;
         public static string CurrentPath;
         public Actions()
         {
-            timer = new Timer();
-            timer.Interval = 500;
-            timer.Tick += timer_Tick;
-            timer.Start();
+            var thread = new Thread(timer_Tick);
+            thread.IsBackground = true;
+            thread.Priority = ThreadPriority.Lowest;
+            thread.Start();
             playerName = ConfigurationManager.AppSettings["playerName"];
             screenIndex = Convert.ToInt32(ConfigurationManager.AppSettings["defaultScreenIndex"]);
         }
-
-        void timer_Tick(object sender, EventArgs e)
+        object locker = new object();
+        private bool skipRequest = false;
+        void timer_Tick()
         {
-            PlayerStatus status = Player.GetStatus();
-            if (status == null)
+            while (true)
             {
-                timer.Stop();
-                ListButton();
-            }
-            else if (status.state == PlayerStatus.States.stopped)
-            {
-                timer.Stop();
-                ListButton();
 
+                lock (locker)
+                {
+                    if (!skipRequest)
+                    {
+                        PlayerStatus status = Player.GetStatus();
+                        if (status == null && Explorer == null)
+                        {
+                            ListButton();
+                        }
+                        else if (status != null && (status.state == PlayerStatus.States.stopped && Explorer == null))
+                        {
+                            ListButton();
+                        }
+                    }
+                }
+                Thread.Sleep(500);
             }
         }
 
 
         public void OkButton()
         {
-            if (Explorer != null)
-                Explorer.OpenSelected();
-            else
+            lock (locker)
             {
-                PlayerStatus status = Player.GetStatus();
-                if (status != null && status.state != PlayerStatus.States.stopped)
-                    Player.PlayPause();
+                if (Explorer != null)
+                {
+                   Dispatcher.BeginInvoke(() =>
+                   {
+                       skipRequest = !Explorer.OpenSelected();
+                   });
+                }
+                else
+                {
+                    PlayerStatus status = Player.GetStatus();
+                    if (status != null && status.state != PlayerStatus.States.stopped)
+                        Player.PlayPause();
+                }
             }
         }
 
@@ -86,16 +103,18 @@ namespace remote
 
         public void LeftButton()
         {
-            timer.Stop();
-            Player.Backward();
-            timer.Start();
+            lock (locker)
+            {
+                Player.Backward();
+            }
         }
 
         public void RightButton()
         {
-            timer.Stop();
-            Player.Forward();
-            timer.Start();
+            lock (locker)
+            {
+                Player.Forward();
+            }
         }
 
         public void ExitButton()
@@ -104,8 +123,6 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
-                timer.Stop();
-
             }
             if (Explorer != null)
                 Explorer.Close();
@@ -113,26 +130,29 @@ namespace remote
 
         public void ListButton()
         {
+            skipRequest = true;
 
             Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {
                 Process.Kill(p);
-                timer.Stop();
 
             }
-            if (Explorer != null)
-                Explorer.Close();
-            Explorer = new Explorer();
-            Explorer.Show();
-            Explorer.Closed += explorer_Closed;
-            Screen[] screens = Screen.AllScreens;
-            var x = screens[screenIndex].WorkingArea.X;
-            var y = screens[screenIndex].WorkingArea.Y;
-            Explorer.Left = x;
-            Explorer.Top = y;
-            Explorer.WindowState = WindowState.Minimized;
-            Explorer.WindowState = WindowState.Maximized;
+            Dispatcher.Invoke(() =>
+            {
+                if (Explorer != null)
+                    Explorer.Close();
+                Explorer = new Explorer();
+                Explorer.Show();
+                Explorer.Closed += explorer_Closed;
+                Screen[] screens = Screen.AllScreens;
+                var x = screens[screenIndex].WorkingArea.X;
+                var y = screens[screenIndex].WorkingArea.Y;
+                Explorer.Left = x;
+                Explorer.Top = y;
+                Explorer.WindowState = WindowState.Minimized;
+                Explorer.WindowState = WindowState.Maximized;
+            });
 
 
         }
@@ -150,7 +170,6 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
-                timer.Stop();
             }
 
             var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
@@ -175,8 +194,10 @@ namespace remote
                     Thread.Sleep(10);
                 }
 
-                Player.SetFullScreen();
-                timer.Start();
+                lock (locker)
+                {
+                    Player.SetFullScreen();
+                }
             }
         }
 
@@ -189,7 +210,6 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
-                timer.Stop();
 
             }
 
@@ -214,45 +234,30 @@ namespace remote
                 {
                     Thread.Sleep(10);
                 }
-                Player.SetFullScreen();
-                timer.Start();
+                lock (locker)
+                {
+                    Player.SetFullScreen();
+                }
 
             }
         }
 
         public void VolUpButton()
         {
-            Player.VolUp();
+            lock (locker)
+            {
+                Player.VolUp();
+            }
         }
 
         public void VolDownButton()
         {
-            Player.VolDown();
+            lock (locker)
+            {
+                Player.VolDown();
+            }
         }
 
-        public void OptionsButton()
-        {
-            //SendKey("{DOWN}");
-        }
 
-    }
-
-    public interface IActions
-    {
-        void Power();
-        void OkButton();
-        void UpButton();
-        void DownButton();
-        void LeftButton();
-        void RightButton();
-        void ExitButton();
-        void ListButton();
-        void NextButton();
-        void PreviousButton();
-        void VolUpButton();
-        void VolDownButton();
-        void OptionsButton();
-        IPlayer Player { get; }
-        IExplorer Explorer { get; set; }
     }
 }

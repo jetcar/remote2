@@ -46,5 +46,17 @@ namespace remote.Properties {
                 this["currentDirectory"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string config {
+            get {
+                return ((string)(this["config"]));
+            }
+            set {
+                this["config"] = value;
+            }
+        }
     }
 }

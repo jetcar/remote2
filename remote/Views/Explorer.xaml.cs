@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 using IoC;
 using remote.Annotations;
@@ -19,7 +20,7 @@ namespace remote
     /// <summary>
     /// Interaction logic for Explorer.xaml
     /// </summary>
-    public partial class Explorer : INotifyPropertyChanged,IExplorer
+    public partial class Explorer : INotifyPropertyChanged, IExplorer
     {
         private string _currentPath;
         private ObservableCollection<string> _files = new ObservableCollection<string>();
@@ -46,16 +47,18 @@ namespace remote
 
         public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
         public IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
-        void Open(string currentPath)
+        bool Open(string currentPath)
         {
+            bool openFile = false;
             bool isDirectory = false;
             try
             {
                 var directories = Directory.GetDirectories(currentPath);
                 var files = Directory.GetFiles(currentPath);
                 isDirectory = true;
-                Files.Clear();
+                Files = new ObservableCollection<string>();
                 Files.Add("..");
+                SelectedIndex = 0;
                 foreach (var dir in directories)
                 {
                     var folders = dir.Split(Path.DirectorySeparatorChar);
@@ -69,7 +72,11 @@ namespace remote
                 }
                 CURRENTDIRECTORY = currentPath;
                 Properties.Settings.Default.currentDirectory = CURRENTDIRECTORY;
-                Properties.Settings.Default.Save();
+                Task.Run(() =>
+                {
+                    Properties.Settings.Default.Save();
+
+                });
 
             }
             catch (Exception)
@@ -90,6 +97,7 @@ namespace remote
                     }
 
                     Process.Start(currentPath);
+                    openFile = true;
                     var playerName = ConfigurationManager.AppSettings["playerName"];
                     p = Process.GetProcessesByName(playerName).FirstOrDefault();
                     while (p == null)
@@ -108,9 +116,14 @@ namespace remote
                 }
                 CURRENTFILE = currentPath;
                 Properties.Settings.Default.currentfile = CURRENTFILE;
-                Properties.Settings.Default.Save();
+                Task.Run(() =>
+                {
+                    Properties.Settings.Default.Save();
+
+                });
             }
             CurrentPath = CURRENTDIRECTORY;
+            return openFile;
         }
         IActions Actions { get { return IoC.IocKernel.GetInstance<IActions>(); } }
 
@@ -171,10 +184,10 @@ namespace remote
         }
 
 
-        public void OpenSelected()
+        public bool OpenSelected()
         {
             if (SelectedIndex < 0)
-                return;
+                return false;
             string path;
             if (SelectedIndex >= Files.Count)
                 SelectedIndex = Files.Count - 1;
@@ -190,7 +203,7 @@ namespace remote
             {
                 path = Path.Combine(CURRENTDIRECTORY, Files[SelectedIndex]);
             }
-            Open(path);
+            return Open(path);
         }
 
         private void ScrollIntoView(object sender, SelectionChangedEventArgs e)

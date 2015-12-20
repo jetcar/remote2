@@ -16,6 +16,7 @@ namespace remote
             IocKernel.registeredServices[typeof(IDirectory)] = new MyDirectory();
             IocKernel.registeredServices[typeof(IPlayer)] = new MyPlayer();
             IocKernel.registeredServices[typeof(IActions)] = new Actions();
+            IocKernel.registeredServices[typeof(IDispatcher)] = new MyDispatcher();
 
             base.OnStartup(e);
         }
