@@ -47,7 +47,11 @@ namespace remote
                         PlayerStatus status = Player.GetStatus();
                         if (status == null && Explorer == null)
                         {
-                            ListButton();
+                            var nextFilename = Directory.NextFileIsFromList(remote.Explorer.CURRENTDIRECTORY, remote.Explorer.CURRENTFILE);
+                            if (nextFilename != null)
+                                NextButton();
+                            else
+                                ListButton();
                         }
                         else if (status != null && (status.state == PlayerStatus.States.stopped && Explorer == null))
                         {
@@ -66,10 +70,10 @@ namespace remote
             {
                 if (Explorer != null)
                 {
-                   Dispatcher.BeginInvoke(() =>
-                   {
-                       skipRequest = !Explorer.OpenSelected();
-                   });
+                    Dispatcher.BeginInvoke(() =>
+                    {
+                        skipRequest = !Explorer.OpenSelected();
+                    });
                 }
                 else
                 {
@@ -189,7 +193,7 @@ namespace remote
                     Thread.Sleep(10);
                     p = Process.GetProcessesByName(playerName).FirstOrDefault();
                 }
-                while (!p.HasExited && p.MainWindowHandle == (IntPtr) 0)
+                while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                 {
                     Thread.Sleep(10);
                 }
@@ -200,6 +204,7 @@ namespace remote
                 }
             }
         }
+
 
         public void PreviousButton()
         {

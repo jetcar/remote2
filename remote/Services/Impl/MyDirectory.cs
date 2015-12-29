@@ -25,5 +25,17 @@ namespace remote
             return Directory.GetDirectories(currentPath);
 
         }
+
+        public string NextFileIsFromList(string folder, string currentFile)
+        {
+            var files = new List<string>(Directory.GetFiles(folder));
+            int currentIndex = files.IndexOf(currentFile);
+            if (currentIndex >= files.Count - 1)
+                return null;
+            var nextFilename = files[currentIndex + 1];
+            if (currentFile.CompareTo(nextFilename) == -1 || currentFile.CompareTo(nextFilename) == 1)
+                return nextFilename;
+            return null;
+        }
     }
 }

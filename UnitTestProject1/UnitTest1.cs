@@ -15,6 +15,17 @@ namespace UnitTestProject1
     public class UnitTest1
     {
         [TestMethod]
+        public void TestActionsExplorer()
+        {
+            IDirectory directory = new MyDirectory();
+            var playNext = directory.NextFileIsFromList("F:\\downl\\Criminal Minds (S10)",
+                "F:\\downl\\Criminal Minds (S10)\\Criminal.Minds.s10e09.WEBDLRip.NewStudio.TV.avi");
+            Assert.AreEqual(playNext, "F:\\downl\\Criminal Minds (S10)\\Criminal.Minds.s10e10.WEBDLRip.NewStudio.TV.avi");
+            playNext = directory.NextFileIsFromList("F:\\downl\\Criminal Minds (S10)",
+                "F:\\downl\\Criminal Minds (S10)\\Criminal.Minds.s10e23.WEBDLRip.NewStudio.TV.avi");
+            Assert.IsNull(playNext);
+        }
+        [TestMethod]
         public void TestActions()
         {
             var directory = new Mock<IDirectory>();
