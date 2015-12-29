@@ -23,6 +23,7 @@
                   FontSize="50"
                   FontWeight="Bold"
                   Foreground="GhostWhite"
+                  MouseDoubleClick="ListView_OnMouseDoubleClick"
                   ItemsSource="{Binding Files}"
                   SelectedIndex="{Binding SelectedIndex}"
                   SelectionChanged="ScrollIntoView" />

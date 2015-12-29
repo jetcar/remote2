@@ -11,6 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Input;
 using IoC;
 using remote.Annotations;
 using Path = System.IO.Path;
@@ -58,7 +59,6 @@ namespace remote
                 isDirectory = true;
                 Files = new ObservableCollection<string>();
                 Files.Add("..");
-                SelectedIndex = 0;
                 foreach (var dir in directories)
                 {
                     var folders = dir.Split(Path.DirectorySeparatorChar);
@@ -203,13 +203,21 @@ namespace remote
             {
                 path = Path.Combine(CURRENTDIRECTORY, Files[SelectedIndex]);
             }
-            return Open(path);
+            var result = Open(path);
+            if (!result)
+                SelectedIndex = 0;
+            return result;
         }
 
         private void ScrollIntoView(object sender, SelectionChangedEventArgs e)
         {
             if (Files.Count > SelectedIndex && SelectedIndex > -1)
                 ListView.ScrollIntoView(Files[SelectedIndex]);
+        }
+
+        private void ListView_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            OpenSelected();
         }
     }
 }
