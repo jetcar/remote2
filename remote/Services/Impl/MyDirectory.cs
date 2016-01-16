@@ -28,6 +28,10 @@ namespace remote
 
         public string NextFileIsFromList(string folder, string currentFile)
         {
+            if (folder == null)
+                return null;
+            if (currentFile == null)
+                return null;
             var files = new List<string>(Directory.GetFiles(folder));
             int currentIndex = files.IndexOf(currentFile);
             if (currentIndex >= files.Count - 1)

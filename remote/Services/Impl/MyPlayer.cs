@@ -90,7 +90,7 @@ namespace remote.Services.Impl
             SendRequestGetStatus(String.Format("?command=seek&val={0}%25", (int)(position * 100)));
         }
 
-        public void SetFullScreen()
+        public void SetFullScreen(Process process)
         {
             const short SWP_NOSIZE = 1;
             const short SWP_ASYNCWINDOWPOS = 0x4000;

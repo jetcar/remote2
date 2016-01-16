@@ -28,6 +28,8 @@ namespace remote
         private int _selectedIndex;
         public static string CURRENTDIRECTORY = Properties.Settings.Default.currentDirectory;
         public static string CURRENTFILE = Properties.Settings.Default.currentfile;
+        public IDispatcher MyDispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
+
         public Explorer()
         {
 
@@ -54,6 +56,7 @@ namespace remote
             bool isDirectory = false;
             try
             {
+
                 var directories = Directory.GetDirectories(currentPath);
                 var files = Directory.GetFiles(currentPath);
                 isDirectory = true;
@@ -95,23 +98,18 @@ namespace remote
                     {
                         p.Kill();
                     }
-
-                    Process.Start(currentPath);
-                    openFile = true;
-                    var playerName = ConfigurationManager.AppSettings["playerName"];
-                    p = Process.GetProcessesByName(playerName).FirstOrDefault();
-                    while (p == null)
+                    MyDispatcher.Invoke(() =>
                     {
-                        Thread.Sleep(10);
-                        p = Process.GetProcessesByName(playerName).FirstOrDefault();
-                    }
-                    while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
-                    {
-                        Thread.Sleep(10);
-                    }
-
-                    Actions.Player.SetFullScreen();
-
+                        
+                        openFile = true;
+                        p = Process.Start(currentPath);
+                        
+                        while (!p.HasExited && p.MainWindowHandle == (IntPtr) 0)
+                        {
+                            Thread.Sleep(10);
+                        }
+//                        Actions.Player.SetFullScreen(p);
+                    });
                     this.Close();
                 }
                 CURRENTFILE = currentPath;
@@ -217,7 +215,7 @@ namespace remote
 
         private void ListView_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            OpenSelected();
+            Actions.OkButton();
         }
     }
 }

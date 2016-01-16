@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace remote.Services
         void PlayPause();
         void Forward();
         void Backward();
-        void SetFullScreen();
+        void SetFullScreen(Process process);
         void VolUp();
         void VolDown();
     }

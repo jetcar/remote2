@@ -23,9 +23,9 @@ namespace remote
             return Process.GetProcessesByName(player);
         }
 
-        public void Start(string currentPath)
+        public Process Start(string currentPath)
         {
-            Process.Start(currentPath);
+            return Process.Start(currentPath);
         }
 
         public Process GetCurrentProcess()
