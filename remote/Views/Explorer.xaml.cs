@@ -15,6 +15,7 @@ using System.Windows.Input;
 using IoC;
 using remote.Annotations;
 using Path = System.IO.Path;
+using Timer = System.Windows.Forms.Timer;
 
 namespace remote
 {
@@ -26,19 +27,27 @@ namespace remote
         private string _currentPath;
         private ObservableCollection<string> _files = new ObservableCollection<string>();
         private int _selectedIndex;
+        private string _currentTime;
         public static string CURRENTDIRECTORY = Properties.Settings.Default.currentDirectory;
         public static string CURRENTFILE = Properties.Settings.Default.currentfile;
         public IDispatcher MyDispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
-
+        private Timer timer;
         public Explorer()
         {
-
+            timer = new Timer();
+            timer.Interval = 100;
+            timer.Tick += Timer_Tick;
+            timer.Start();
             if (!Directory.Exists(Properties.Settings.Default.currentDirectory))
                 CURRENTDIRECTORY = null;
             CurrentPath = CURRENTDIRECTORY ?? ConfigurationManager.AppSettings["defaultPath"];
 
             if (!File.Exists(Properties.Settings.Default.currentfile))
                 CURRENTFILE = null;
+            else
+            {
+                CURRENTFILE = Properties.Settings.Default.currentfile;
+            }
             if (CURRENTFILE != null)
                 SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
 
@@ -46,6 +55,17 @@ namespace remote
             Open(CurrentPath);
 
             InitializeComponent();
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            CurrentTime = DateTime.Now.ToLongTimeString();
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            timer.Tick -= Timer_Tick;
+            base.OnClosing(e);
         }
 
         public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
@@ -100,15 +120,15 @@ namespace remote
                     }
                     MyDispatcher.Invoke(() =>
                     {
-                        
+
                         openFile = true;
                         p = Process.Start(currentPath);
-                        
-                        while (!p.HasExited && p.MainWindowHandle == (IntPtr) 0)
+
+                        while (p != null && !p.HasExited && p.MainWindowHandle == (IntPtr)0)
                         {
                             Thread.Sleep(10);
                         }
-//                        Actions.Player.SetFullScreen(p);
+                        //                        Actions.Player.SetFullScreen(p);
                     });
                     this.Close();
                 }
@@ -148,6 +168,16 @@ namespace remote
         }
 
 
+        public string CurrentTime
+        {
+            get { return _currentTime; }
+            set
+            {
+                if (value == _currentTime) return;
+                _currentTime = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string CurrentPath
         {
@@ -195,6 +225,7 @@ namespace remote
                 var list = new List<string>(folders);
                 if (list.Count > 1)
                     list.RemoveAt(list.Count - 1);
+                list[0] = list[0] + "\\";
                 path = Path.Combine(list.ToArray());
             }
             else

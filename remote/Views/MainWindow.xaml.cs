@@ -54,6 +54,17 @@ namespace remote
         IDictionary<string, ButtonCommands> actions = new Dictionary<string, ButtonCommands>();
         private void Add_click(ButtonCommands command)
         {
+            if (SelectedCode == null)
+            {
+                try
+                {
+                    command.Method.Invoke();
+                    return;
+                }
+                catch (Exception)
+                {
+                }
+            }
             command.Commands.Add(SelectedCode);
             foreach (var buttonCommand in buttons)
             {
@@ -303,7 +314,14 @@ namespace remote
         {
             if (actions.ContainsKey(speedReading))
             {
-                actions[speedReading].Run();
+                try
+                {
+                    actions[speedReading].Run();
+                }
+                catch (Exception e)
+                {
+                    
+                }
             }
         }
 

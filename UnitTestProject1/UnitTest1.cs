@@ -26,6 +26,13 @@ namespace UnitTestProject1
             Assert.IsNull(playNext);
         }
         [TestMethod]
+        public void TestPathCombine()
+        {
+            var playNext = Path.Combine("d:\\","downl", "test.avi");
+             
+            Assert.AreEqual("d:\\downl\\test.avi", playNext);
+        }
+        [TestMethod]
         public void TestActions()
         {
             var directory = new Mock<IDirectory>();

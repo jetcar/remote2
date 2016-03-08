@@ -16,10 +16,19 @@ namespace remote.Services.Impl
     {
 
         public IDispatcher Dispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
-        [System.Runtime.InteropServices.DllImport("coredll.dll")]
-        static extern int SetForegroundWindow(IntPtr point);
-
+        //        [System.Runtime.InteropServices.DllImport("coredll.dll")]
+        //        static extern int SetForegroundWindow(IntPtr point);
+        const int WM_KEYDOWN = 0x100;
         private static string player;
+        Dictionary<string,int> codes = new Dictionary<string, int>()
+        {
+            {" ", 0x20 },
+            {".", 0xBE },
+            {",", 0xBC },
+            {"f", 0x46 },
+            {"{UP}", 0x26 },
+            {"{DOWN}", 0x28 },
+        };
         public Bsplayer()
         {
             player = ConfigurationManager.AppSettings["playerName"];
@@ -68,12 +77,14 @@ namespace remote.Services.Impl
         {
             Dispatcher.Invoke(() =>
             {
-                var p = FindWindow(null,player);
+                var p = FindWindowByCaption(0, player);
                 if (p != null)
                 {
 
-                    SetForegroundWindow(p);
-                    SendKeys.SendWait(key);
+                    //                    SetForegroundWindow(p);
+                    //                    SendKeys.SendWait(key);
+                    var keycode = codes[key];
+                    SendMessage(p, WM_KEYDOWN, keycode, IntPtr.Zero);
                     Console.WriteLine("{0} {1}", DateTime.Now, key);
                 }
                 
@@ -81,34 +92,18 @@ namespace remote.Services.Impl
 
         }
 
-        [DllImportAttribute("User32.dll")]
-        private static extern int FindWindow(String ClassName, String WindowName);
+//        [DllImportAttribute("User32.dll")]
+//        private static extern int FindWindow(String ClassName, String WindowName);
+//
+//        [DllImport("user32.dll")]
+//        private static extern IntPtr SetForegroundWindow(int hWnd);
 
-        [DllImport("user32.dll")]
-        private static extern IntPtr SetForegroundWindow(int hWnd);
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, int wParam, IntPtr lParam);
 
-        public int Activate(int hWnd)
-        {
-            if (hWnd > 0)
-            {
-                SetForegroundWindow(hWnd);
-                return hWnd;
-            }
-            else
-            {
-                return -1;
-            }
-        }
+        [DllImport("user32.dll", EntryPoint = "FindWindow", SetLastError = true)]
+        static extern IntPtr FindWindowByCaption(int ZeroOnly, string lpWindowName);
 
-        public int GetWindowHwnd(string className, string windowName)
-        {
-            int hwnd = 0;
-            string cls = className == string.Empty ? null : className;
-            string win = windowName == string.Empty ? null : windowName;
-
-            hwnd = FindWindow(cls, win);
-            return hwnd;
-        }
 
     }
 }

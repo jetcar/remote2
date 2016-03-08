@@ -15,7 +15,7 @@
                         IconSource="/images/tray.ico"
                         LeftClickCommand="{Binding TrayClick}"
                         MenuActivation="LeftOrRightClick"
-                        PopupActivation="DoubleClick"
+                        PopupActivation="LeftOrRightClick"
                         ToolTipText="ir remote"
                         Visibility="Visible" />
         <ComboBox DockPanel.Dock="Top"
