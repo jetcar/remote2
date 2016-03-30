@@ -108,7 +108,8 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Services\Impl\Bsplayer.cs" />
+    <Compile Include="Services\Impl\Players\MPCplayer.cs" />
+    <Compile Include="Services\Impl\Players\Bsplayer.cs" />
     <Compile Include="Services\Impl\MyDispatcher.cs" />
     <Compile Include="Services\Impl\Actions.cs" />
     <Compile Include="App.xaml.cs">
@@ -120,7 +121,7 @@
     <Compile Include="Services\IDirectory.cs" />
     <Compile Include="Services\IExplorer.cs" />
     <Compile Include="Services\IDispatcher.cs" />
-    <Compile Include="Services\Impl\MyPlayer.cs" />
+    <Compile Include="Services\Impl\Players\MyPlayer.cs" />
     <Compile Include="Services\IPlayer.cs" />
     <Compile Include="Services\IProcess.cs" />
     <Compile Include="Services\Impl\MyDirectory.cs" />

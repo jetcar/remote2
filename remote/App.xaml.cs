@@ -14,7 +14,7 @@ namespace remote
         {
             IocKernel.registeredServices[typeof(IProcess)] = new MyProcess();
             IocKernel.registeredServices[typeof(IDirectory)] = new MyDirectory();
-            IocKernel.registeredServices[typeof(IPlayer)] = new Bsplayer();
+            IocKernel.registeredServices[typeof(IPlayer)] = new MPCplayer();
             IocKernel.registeredServices[typeof(IActions)] = new Actions();
             IocKernel.registeredServices[typeof(IDispatcher)] = new MyDispatcher();
 

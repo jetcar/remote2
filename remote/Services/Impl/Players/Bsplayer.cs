@@ -31,7 +31,7 @@ namespace remote.Services.Impl
         };
         public Bsplayer()
         {
-            player = ConfigurationManager.AppSettings["playerName"];
+            player = "bsplayer";
         }
         public PlayerStatus GetStatus()
         {
