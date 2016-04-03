@@ -13,6 +13,10 @@ namespace remote
         {
             return Directory.Exists(currentDirectory);
         }
+        public bool FileExists(string currentDirectory)
+        {
+            return File.Exists(currentDirectory);
+        }
 
         public IList<string> GetFiles(string currentPath)
         {

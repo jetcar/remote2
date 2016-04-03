@@ -72,6 +72,7 @@ namespace remote
         public IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
         bool Open(string currentPath)
         {
+            currentPath = currentPath.Replace("\\\\", "\\");
             bool openFile = false;
             bool isDirectory = false;
             try
@@ -102,7 +103,7 @@ namespace remote
                 });
 
             }
-            catch (Exception)
+            catch (Exception e)
             {
 
             }

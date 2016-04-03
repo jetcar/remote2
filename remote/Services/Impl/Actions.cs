@@ -48,7 +48,7 @@ namespace remote
                         {
                             if (!Directory.Exists(remote.Explorer.CURRENTDIRECTORY))
                                 remote.Explorer.CURRENTDIRECTORY = null;
-                            if (!Directory.Exists(remote.Explorer.CURRENTFILE))
+                            if (!Directory.FileExists(remote.Explorer.CURRENTFILE))
                                 remote.Explorer.CURRENTFILE = null;
                             var nextFilename = Directory.NextFileIsFromList(remote.Explorer.CURRENTDIRECTORY, remote.Explorer.CURRENTFILE);
                             if (nextFilename != null)
@@ -76,6 +76,8 @@ namespace remote
                     Dispatcher.BeginInvoke(() =>
                     {
                         skipRequest = !Explorer.OpenSelected();
+                        if (!timerThread.IsAlive)
+                            timerThread.Start();
                     });
                 }
                 else
@@ -126,6 +128,7 @@ namespace remote
 
         public void ExitButton()
         {
+            skipRequest = true;
             Process p = Process.GetProcessesByName(playerName).FirstOrDefault();
             if (p != null)
             {

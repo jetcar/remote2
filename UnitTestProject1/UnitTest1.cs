@@ -25,6 +25,15 @@ namespace UnitTestProject1
                 "F:\\downl\\Criminal Minds (S10)\\Criminal.Minds.s10e23.WEBDLRip.NewStudio.TV.avi");
             Assert.IsNull(playNext);
         }
+
+        [TestMethod]
+        public void TestGetDirectoriaes()
+        {
+            IDirectory directory = new MyDirectory();
+            var playNext = directory.FileExists("F:\\downl\\Вечерний Ургант. Рубрика Взгляд снизу\\Вечерний Ургант.  Взгляд снизу ( 20.11.2015).mp4");
+            
+            Assert.IsTrue(playNext);
+        }
         [TestMethod]
         public void TestPathCombine()
         {
