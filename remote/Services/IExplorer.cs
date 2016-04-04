@@ -7,7 +7,7 @@ namespace remote
     {
         bool OpenSelected();
         void MoveUp();
-        void MoveDown();
+        bool MoveDown();
         void Close();
         void Show();
         double Left { get; set; }

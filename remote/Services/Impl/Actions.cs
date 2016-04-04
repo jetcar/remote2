@@ -44,21 +44,16 @@ namespace remote
                     if (!skipRequest)
                     {
                         PlayerStatus status = Player.GetStatus();
-                        if (status == null && Explorer == null)
-                        {
-                            if (!Directory.Exists(remote.Explorer.CURRENTDIRECTORY))
-                                remote.Explorer.CURRENTDIRECTORY = null;
-                            if (!Directory.FileExists(remote.Explorer.CURRENTFILE))
-                                remote.Explorer.CURRENTFILE = null;
-                            var nextFilename = Directory.NextFileIsFromList(remote.Explorer.CURRENTDIRECTORY, remote.Explorer.CURRENTFILE);
-                            if (nextFilename != null)
-                                NextButton();
-                            else
-                                ListButton();
-                        }
-                        else if (status != null && (status.state == PlayerStatus.States.stopped && Explorer == null))
+                        if (status == null)
                         {
                             ListButton();
+                            if (Explorer != null)
+                            {
+                                if (Explorer.MoveDown())
+                                {
+                                    OkButton();
+                                }
+                            }
                         }
                     }
                 }

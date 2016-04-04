@@ -206,10 +206,14 @@ namespace remote
                 SelectedIndex--;
         }
 
-        public void MoveDown()
+        public bool MoveDown()
         {
             if (SelectedIndex < Files.Count)
+            {
                 SelectedIndex++;
+                return true;
+            }
+            return false;
         }
 
 
