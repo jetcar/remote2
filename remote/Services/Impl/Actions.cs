@@ -95,6 +95,13 @@ namespace remote
             {
                 Explorer.MoveUp();
             }
+            else
+            {
+                lock (locker)
+                {
+                    Player.VolUp();
+                }
+            }
         }
 
         public void DownButton()
@@ -102,6 +109,13 @@ namespace remote
             if (Explorer != null)
             {
                 Explorer.MoveDown();
+            }
+            else
+            {
+                lock (locker)
+                {
+                    Player.VolDown();
+                }
             }
         }
 
