@@ -41,6 +41,7 @@
             FontSize="50"
             FontWeight="Bold"
             DockPanel.Dock="Top"
+            VirtualizingStackPanel.IsVirtualizing="False"
             ItemsSource="{Binding Files}"
             MouseDoubleClick="ListView_OnMouseDoubleClick"
             SelectedIndex="{Binding SelectedIndex}"

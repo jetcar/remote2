@@ -297,7 +297,12 @@ namespace remote
                         if (!string.IsNullOrEmpty(speedReading.Trim()))
                             HandleRemoteCode(speedReading);
                         if (!string.IsNullOrEmpty(speedReading.Trim()))
-                            Lines.Insert(0, speedReading);
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                Lines.Insert(0, speedReading);
+                            });
+                        }
 
                     }
                     catch (Exception)
@@ -320,7 +325,7 @@ namespace remote
                 }
                 catch (Exception e)
                 {
-                    
+
                 }
             }
         }
