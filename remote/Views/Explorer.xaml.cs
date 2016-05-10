@@ -215,6 +215,22 @@ namespace remote
             }
             return false;
         }
+        public bool MoveOpenNextIfSameName()
+        {
+            if (SelectedIndex < Files.Count)
+            {
+                if (MyDirectory.Compare(Files[SelectedIndex], Files[SelectedIndex + 1]) < 4)
+                {
+                    SelectedIndex++;
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return false;
+        }
 
 
         public bool OpenSelected()

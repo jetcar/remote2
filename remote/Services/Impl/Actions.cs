@@ -49,7 +49,8 @@ namespace remote
                             ListButton();
                             if (Explorer != null)
                             {
-                                if (Explorer.MoveDown())
+
+                                if (Explorer.MoveOpenNextIfSameName())
                                 {
                                     OkButton();
                                 }
@@ -142,6 +143,13 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
+                while (Process.GetProcessesByName(playerName).FirstOrDefault() != null)
+                {
+                    Thread.Sleep(1);
+                }
+                if (Explorer == null)
+                    ListButton();
+                return;
             }
             if (Explorer != null)
             {
@@ -215,7 +223,7 @@ namespace remote
             {
 
                 p = Process.Start(remote.Explorer.CURRENTFILE);
-                
+
                 while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                 {
                     Thread.Sleep(10);
@@ -223,7 +231,7 @@ namespace remote
 
                 lock (locker)
                 {
-                   // Player.SetFullScreen(p);
+                    // Player.SetFullScreen(p);
                 }
             }
         }
@@ -252,7 +260,7 @@ namespace remote
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
                 p = Process.Start(remote.Explorer.CURRENTFILE);
-               
+
                 while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                 {
                     Thread.Sleep(10);

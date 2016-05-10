@@ -15,5 +15,6 @@ namespace remote
         double Top { get; set; }
         int SelectedIndex { get; set; }
         event EventHandler Closed;
+        bool MoveOpenNextIfSameName();
     }
 }
