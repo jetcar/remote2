@@ -1,11 +1,11 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace remote
 {
     public interface IExplorer
     {
-        bool OpenSelected();
         void MoveUp();
         bool MoveDown();
         void Close();
@@ -15,6 +15,5 @@ namespace remote
         double Top { get; set; }
         int SelectedIndex { get; set; }
         event EventHandler Closed;
-        bool MoveOpenNextIfSameName();
     }
 }

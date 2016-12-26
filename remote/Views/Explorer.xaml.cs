@@ -28,8 +28,6 @@ namespace remote
         private ObservableCollection<string> _files = new ObservableCollection<string>();
         private int _selectedIndex;
         private string _currentTime;
-        public static string CURRENTDIRECTORY = Properties.Settings.Default.currentDirectory;
-        public static string CURRENTFILE = Properties.Settings.Default.currentfile;
         public IDispatcher MyDispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
         private Timer timer;
         public Explorer()
@@ -39,21 +37,21 @@ namespace remote
             timer.Tick += Timer_Tick;
             timer.Start();
             if (!Directory.Exists(Properties.Settings.Default.currentDirectory))
-                CURRENTDIRECTORY = null;
-            CurrentPath = CURRENTDIRECTORY ?? ConfigurationManager.AppSettings["defaultPath"];
+                Directory.CURRENTDIRECTORY = null;
+            CurrentPath = Directory.CURRENTDIRECTORY ?? ConfigurationManager.AppSettings["defaultPath"];
 
             if (!File.Exists(Properties.Settings.Default.currentfile))
-                CURRENTFILE = null;
+                Directory.CURRENTFILE = null;
             else
             {
-                CURRENTFILE = Properties.Settings.Default.currentfile;
+                Directory.CURRENTFILE = Properties.Settings.Default.currentfile;
             }
-            if (CURRENTFILE != null)
-                SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
+            if (Directory.CURRENTFILE != null)
+                SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(Directory.CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
 
 
-            Open(CurrentPath);
-
+            Files = Directory.OpenDirectory(CurrentPath);
+            SelectedIndex = Directory.SelectedIndex;
             InitializeComponent();
         }
 
@@ -69,81 +67,7 @@ namespace remote
         }
 
         public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
-        public IProcess Process { get { return IocKernel.GetInstance<IProcess>(); } }
-        bool Open(string currentPath)
-        {
-            currentPath = currentPath.Replace("\\\\", "\\");
-            bool openFile = false;
-            bool isDirectory = false;
-            try
-            {
-
-                var directories = Directory.GetDirectories(currentPath);
-                var files = Directory.GetFiles(currentPath);
-                isDirectory = true;
-                Files = new ObservableCollection<string>();
-                Files.Add("..");
-                foreach (var dir in directories)
-                {
-                    var folders = dir.Split(Path.DirectorySeparatorChar);
-                    Files.Add(folders.Last());
-                }
-                foreach (var file in files)
-                {
-                    var folders = file.Split(Path.DirectorySeparatorChar);
-
-                    Files.Add(folders.Last());
-                }
-                CURRENTDIRECTORY = currentPath;
-                Properties.Settings.Default.currentDirectory = CURRENTDIRECTORY;
-                Task.Run(() =>
-                {
-                    Properties.Settings.Default.Save();
-
-                });
-
-            }
-            catch (Exception e)
-            {
-
-            }
-            if (!isDirectory)
-            {
-                var extension = Path.GetExtension(currentPath);
-                if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
-                {
-                    var player = ConfigurationManager.AppSettings["playerName"];
-
-                    Process p = Process.GetProcessesByName(player).FirstOrDefault();
-                    if (p != null)
-                    {
-                        p.Kill();
-                    }
-                    MyDispatcher.Invoke(() =>
-                    {
-
-                        openFile = true;
-                        p = Process.Start(currentPath);
-
-                        while (p != null && !p.HasExited && p.MainWindowHandle == (IntPtr)0)
-                        {
-                            Thread.Sleep(10);
-                        }
-                        //                        Actions.Player.SetFullScreen(p);
-                    });
-                    this.Close();
-                }
-                CURRENTFILE = currentPath;
-                Properties.Settings.Default.currentfile = CURRENTFILE;
-                Task.Run(() =>
-                {
-                    Properties.Settings.Default.Save();
-
-                });
-            }
-            CurrentPath = CURRENTDIRECTORY;
-            return openFile;
-        }
+       
         IActions Actions { get { return IoC.IocKernel.GetInstance<IActions>(); } }
 
         public ObservableCollection<string> Files
@@ -165,6 +89,7 @@ namespace remote
                 if (value == _selectedIndex) return;
                 _selectedIndex = value;
                 OnPropertyChanged();
+                Directory.SelectedIndex = value;
             }
         }
 
@@ -214,49 +139,6 @@ namespace remote
                 return true;
             }
             return false;
-        }
-        public bool MoveOpenNextIfSameName()
-        {
-            if (SelectedIndex < Files.Count)
-            {
-                if (MyDirectory.Compare(Files[SelectedIndex], Files[SelectedIndex + 1]) < 4)
-                {
-                    SelectedIndex++;
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            return false;
-        }
-
-
-        public bool OpenSelected()
-        {
-            if (SelectedIndex < 0)
-                return false;
-            string path;
-            if (SelectedIndex >= Files.Count)
-                SelectedIndex = Files.Count - 1;
-            if (Files[SelectedIndex] == "..")
-            {
-                var folders = CurrentPath.Split(Path.DirectorySeparatorChar);
-                var list = new List<string>(folders);
-                if (list.Count > 1)
-                    list.RemoveAt(list.Count - 1);
-                list[0] = list[0] + "\\";
-                path = Path.Combine(list.ToArray());
-            }
-            else
-            {
-                path = Path.Combine(CURRENTDIRECTORY, Files[SelectedIndex]);
-            }
-            var result = Open(path);
-            if (!result)
-                SelectedIndex = 0;
-            return result;
         }
 
         private void ScrollIntoView(object sender, SelectionChangedEventArgs e)

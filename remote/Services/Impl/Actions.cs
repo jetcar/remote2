@@ -46,15 +46,14 @@ namespace remote
                         PlayerStatus status = Player.GetStatus();
                         if (status == null)
                         {
-                            ListButton();
-                            if (Explorer != null)
+                            if (Directory.MoveOpenNextIfSameName())
                             {
-
-                                if (Explorer.MoveOpenNextIfSameName())
-                                {
-                                    OkButton();
-                                }
+                                OkButton();
+                                Explorer.Close();
                             }
+                            else
+                            ListButton();
+                            
                         }
                     }
                 }
@@ -71,7 +70,9 @@ namespace remote
                 {
                     Dispatcher.BeginInvoke(() =>
                     {
-                        skipRequest = !Explorer.OpenSelected();
+                        skipRequest = !Directory.OpenSelected();
+                        if(!skipRequest)
+                            Explorer.Close();
                         if (!timerThread.IsAlive)
                             timerThread.Start();
                     });
@@ -160,8 +161,13 @@ namespace remote
             }
         }
 
+        private bool opening = false;
+
         public void ListButton()
         {
+            if(opening)
+                return;
+            opening = true;
             skipRequest = true;
             if (!timerThread.IsAlive)
                 timerThread.Start();
@@ -187,6 +193,7 @@ namespace remote
                 Explorer.WindowState = WindowState.Minimized;
                 Explorer.WindowState = WindowState.Maximized;
             });
+            opening = false;
 
 
         }
@@ -206,23 +213,23 @@ namespace remote
                 Process.Kill(p);
             }
 
-            var dirs = new List<string>(Directory.GetDirectories(remote.Explorer.CURRENTDIRECTORY));
-            var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
+            var dirs = new List<string>(Directory.GetDirectories(Directory.CURRENTDIRECTORY));
+            var files = new List<string>(Directory.GetFiles(Directory.CURRENTDIRECTORY));
             for (int i = dirs.Count - 1; i >= 0; i--)
             {
                 files.Insert(0, dirs[i]);
             }
-            var index = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY)).IndexOf(remote.Explorer.CURRENTFILE) + 1 + Directory.GetDirectories(remote.Explorer.CURRENTDIRECTORY).Count;
+            var index = new List<string>(Directory.GetFiles(Directory.CURRENTDIRECTORY)).IndexOf(Directory.CURRENTFILE) + 1 + Directory.GetDirectories(Directory.CURRENTDIRECTORY).Count;
             if (index < files.Count - 1)
             {
                 index++;
             }
-            remote.Explorer.CURRENTFILE = files[index];
-            var extension = Path.GetExtension(remote.Explorer.CURRENTFILE);
+            Directory.CURRENTFILE = files[index];
+            var extension = Path.GetExtension(Directory.CURRENTFILE);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
 
-                p = Process.Start(remote.Explorer.CURRENTFILE);
+                p = Process.Start(Directory.CURRENTFILE);
 
                 while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                 {
@@ -249,17 +256,17 @@ namespace remote
 
             }
 
-            var files = new List<string>(Directory.GetFiles(remote.Explorer.CURRENTDIRECTORY));
-            var index = files.IndexOf(remote.Explorer.CURRENTFILE);
+            var files = new List<string>(Directory.GetFiles(Directory.CURRENTDIRECTORY));
+            var index = files.IndexOf(Directory.CURRENTFILE);
             if (index > 0)
             {
                 index--;
             }
-            remote.Explorer.CURRENTFILE = files[index];
-            var extension = Path.GetExtension(remote.Explorer.CURRENTFILE);
+            Directory.CURRENTFILE = files[index];
+            var extension = Path.GetExtension(Directory.CURRENTFILE);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
-                p = Process.Start(remote.Explorer.CURRENTFILE);
+                p = Process.Start(Directory.CURRENTFILE);
 
                 while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
                 {

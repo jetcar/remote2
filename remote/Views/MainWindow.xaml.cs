@@ -176,9 +176,10 @@ namespace remote
         }
         public List<ButtonCommands> Load()
         {
-            var configvalue = Properties.Settings.Default.config;
-            if (string.IsNullOrEmpty(configvalue))
+            Directory.SetCurrentDirectory("F:\\github\\remote\\remote\\bin\\Debug");
+            var configvalue ="";
             {
+
                 using (var reader = new StreamReader("config.xml"))
                 {
                     configvalue = reader.ReadToEnd();
