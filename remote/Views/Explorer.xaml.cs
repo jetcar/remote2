@@ -93,6 +93,12 @@ namespace remote
             }
         }
 
+        public void Refresh()
+        {
+            Files = Directory.Files;
+            SelectedIndex = Directory.SelectedIndex;
+        }
+
 
         public string CurrentTime
         {

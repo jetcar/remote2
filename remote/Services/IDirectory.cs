@@ -16,6 +16,7 @@ namespace remote
         string CURRENTDIRECTORY { get; set; }
         string CURRENTFILE { get; set; }
         int SelectedIndex { get; set; }
+        ObservableCollection<string> Files { get; set; }
         bool OpenSelected();
         bool MoveOpenNextIfSameName();
     }

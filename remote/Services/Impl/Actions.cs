@@ -46,18 +46,21 @@ namespace remote
                         PlayerStatus status = Player.GetStatus();
                         if (status == null)
                         {
-                            if (Directory.MoveOpenNextIfSameName())
+                            skipRequest = true;
+                            if (Directory != null && Directory.Files!= null && Directory.Files.Count > Directory.SelectedIndex)
                             {
-                                OkButton();
-                                Explorer.Close();
+                                Directory.SelectedIndex++;
+                                Directory.OpenSelected();
+                                Thread.Sleep(5000);
                             }
                             else
-                            ListButton();
-                            
+                            {
+                                ListButton();
+                            }
                         }
                     }
                 }
-                Thread.Sleep(500);
+                Thread.Sleep(100);
             }
         }
 
@@ -71,8 +74,10 @@ namespace remote
                     Dispatcher.BeginInvoke(() =>
                     {
                         skipRequest = !Directory.OpenSelected();
-                        if(!skipRequest)
+                        if (!skipRequest)
                             Explorer.Close();
+                        else
+                            Explorer.Refresh();
                         if (!timerThread.IsAlive)
                             timerThread.Start();
                     });
@@ -161,13 +166,9 @@ namespace remote
             }
         }
 
-        private bool opening = false;
 
         public void ListButton()
         {
-            if(opening)
-                return;
-            opening = true;
             skipRequest = true;
             if (!timerThread.IsAlive)
                 timerThread.Start();
@@ -193,7 +194,6 @@ namespace remote
                 Explorer.WindowState = WindowState.Minimized;
                 Explorer.WindowState = WindowState.Maximized;
             });
-            opening = false;
 
 
         }

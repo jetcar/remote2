@@ -75,7 +75,7 @@ namespace remote
                 SelectedIndex = Files.Count - 1;
             if (Files[SelectedIndex] == "..")
             {
-                var folders = CurrentPath.Split(Path.DirectorySeparatorChar);
+                var folders = CURRENTDIRECTORY.Split(Path.DirectorySeparatorChar);
                 var list = new List<string>(folders);
                 if (list.Count > 1)
                     list.RemoveAt(list.Count - 1);
@@ -96,7 +96,7 @@ namespace remote
 
         public bool MoveOpenNextIfSameName()
         {
-            if (SelectedIndex < Files.Count)
+            if (SelectedIndex < Files.Count-1)
             {
                 if (Compare(Files[SelectedIndex], Files[SelectedIndex + 1]) < 4)
                 {
@@ -121,6 +121,7 @@ namespace remote
 
                 Files = LoadFiles(currentPath);
                 isDirectory = true;
+                SelectedIndex = 0;
                 CURRENTDIRECTORY = currentPath;
                 Properties.Settings.Default.currentDirectory = CURRENTDIRECTORY;
                 Task.Run(() =>
