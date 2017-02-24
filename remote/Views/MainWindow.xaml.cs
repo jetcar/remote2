@@ -32,7 +32,8 @@ namespace remote
         private string _selectedCodes;
         private IList<ButtonCommands> _commands = new List<ButtonCommands>();
         public ButtonCommands Power { get; set; }
-        IActions Actions { get { return IoC.IocKernel.GetInstance<IActions>(); } }
+        private IActions Actions
+        { get { return IoC.IocKernel.GetInstance<IActions>(); } }
         public ButtonCommands OkButton { get; set; }
         public ButtonCommands UpButton { get; set; }
 
@@ -51,7 +52,8 @@ namespace remote
         public ButtonCommands Yellow { get; set; }
         public ButtonCommands Blue { get; set; }
         private IList<ButtonCommands> buttons = new List<ButtonCommands>();
-        IDictionary<string, ButtonCommands> actions = new Dictionary<string, ButtonCommands>();
+        private IDictionary<string, ButtonCommands> actions = new Dictionary<string, ButtonCommands>();
+
         private void Add_click(ButtonCommands command)
         {
             if (SelectedCode == null)
@@ -84,7 +86,6 @@ namespace remote
             {
                 Hide();
                 ShowInTaskbar = false;
-
             }
         }
 
@@ -146,11 +147,10 @@ namespace remote
             this.Loaded += MainWindow_Loaded;
         }
 
-        void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Hide();
             IocKernel.GetInstance<IDispatcher>().SetDispatcher(Dispatcher);
-
         }
 
         private void Tray_click(string obj)
@@ -171,15 +171,14 @@ namespace remote
                 var xml = sww.ToString(); // Your XML
                 Properties.Settings.Default.config = xml;
                 Properties.Settings.Default.Save();
-
             }
         }
+
         public List<ButtonCommands> Load()
         {
             Directory.SetCurrentDirectory("F:\\github\\remote\\remote\\bin\\Debug");
-            var configvalue ="";
+            var configvalue = "";
             {
-
                 using (var reader = new StreamReader("config.xml"))
                 {
                     configvalue = reader.ReadToEnd();
@@ -282,7 +281,6 @@ namespace remote
             run = true;
             thread = new Thread(() =>
             {
-
                 while (run)
                 {
                     if (!port.IsOpen)
@@ -304,13 +302,14 @@ namespace remote
                                 Lines.Insert(0, speedReading);
                             });
                         }
-
                     }
                     catch (Exception)
                     {
-
                     }
-
+                }
+                if (port.IsOpen)
+                {
+                    port.Close();
                 }
             });
             thread.Start();
@@ -326,11 +325,9 @@ namespace remote
                 }
                 catch (Exception e)
                 {
-
                 }
             }
         }
-
 
         public SynchronizedObservableCollection<String> Lines
         {
@@ -341,14 +338,6 @@ namespace remote
         protected override void OnClosing(CancelEventArgs e)
         {
             run = false;
-            if (port.IsOpen)
-            {
-                port.Close();
-            }
-            while (thread.IsAlive)
-            {
-                thread.Interrupt();
-            }
 
             base.OnClosing(e);
         }

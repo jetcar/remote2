@@ -19,10 +19,11 @@ namespace remote
         public IExplorer Explorer { get; set; }
         public IPlayer Player { get { return IocKernel.GetInstance<IPlayer>(); } }
         public IDispatcher Dispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
-        static string playerName;
-        static int screenIndex;
+        private static string playerName;
+        private static int screenIndex;
         public static string CurrentPath;
         private Thread timerThread;
+
         public Actions()
         {
             timerThread = new Thread(timer_Tick);
@@ -32,13 +33,14 @@ namespace remote
             playerName = ConfigurationManager.AppSettings["playerName"];
             screenIndex = Convert.ToInt32(ConfigurationManager.AppSettings["defaultScreenIndex"]);
         }
-        object locker = new object();
+
+        private object locker = new object();
         private bool skipRequest = false;
-        void timer_Tick()
+
+        private void timer_Tick()
         {
             while (true)
             {
-
                 lock (locker)
                 {
                     if (!skipRequest)
@@ -47,7 +49,7 @@ namespace remote
                         if (status == null)
                         {
                             skipRequest = true;
-                            if (Directory != null && Directory.Files!= null && Directory.Files.Count > Directory.SelectedIndex)
+                            if (Directory != null && Directory.Files != null && Directory.Files.Count > Directory.SelectedIndex)
                             {
                                 Directory.SelectedIndex++;
                                 Directory.OpenSelected();
@@ -57,13 +59,13 @@ namespace remote
                             {
                                 ListButton();
                             }
+                            skipRequest = false;
                         }
                     }
                 }
                 Thread.Sleep(100);
             }
         }
-
 
         public void OkButton()
         {
@@ -73,6 +75,7 @@ namespace remote
                 {
                     Dispatcher.BeginInvoke(() =>
                     {
+                        Explorer.CurrentPath = Directory.CURRENTFILE;
                         skipRequest = !Directory.OpenSelected();
                         if (!skipRequest)
                             Explorer.Close();
@@ -166,7 +169,6 @@ namespace remote
             }
         }
 
-
         public void ListButton()
         {
             skipRequest = true;
@@ -177,7 +179,6 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
-
             }
             Dispatcher.Invoke(() =>
             {
@@ -194,11 +195,9 @@ namespace remote
                 Explorer.WindowState = WindowState.Minimized;
                 Explorer.WindowState = WindowState.Maximized;
             });
-
-
         }
 
-        void explorer_Closed(object sender, EventArgs e)
+        private void explorer_Closed(object sender, EventArgs e)
         {
             Explorer = null;
         }
@@ -228,7 +227,6 @@ namespace remote
             var extension = Path.GetExtension(Directory.CURRENTFILE);
             if (ConfigurationManager.AppSettings["extensions"].Contains(extension))
             {
-
                 p = Process.Start(Directory.CURRENTFILE);
 
                 while (!p.HasExited && p.MainWindowHandle == (IntPtr)0)
@@ -243,7 +241,6 @@ namespace remote
             }
         }
 
-
         public void PreviousButton()
         {
             if (Explorer != null)
@@ -253,7 +250,6 @@ namespace remote
             if (p != null)
             {
                 Process.Kill(p);
-
             }
 
             var files = new List<string>(Directory.GetFiles(Directory.CURRENTDIRECTORY));
@@ -276,7 +272,6 @@ namespace remote
                 {
                     //Player.SetFullScreen(p);
                 }
-
             }
         }
 
@@ -295,7 +290,5 @@ namespace remote
                 Player.VolDown();
             }
         }
-
-
     }
 }

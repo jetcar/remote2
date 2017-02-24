@@ -22,7 +22,6 @@ namespace remote
             Task.Run(() =>
             {
                 Properties.Settings.Default.Save();
-
             });
 
             return files;
@@ -33,12 +32,12 @@ namespace remote
             get { return Properties.Settings.Default.currentDirectory; }
             set { Properties.Settings.Default.currentDirectory = value; }
         }
+
         public string CURRENTFILE
         {
             get { return Properties.Settings.Default.currentfile; }
             set { Properties.Settings.Default.currentfile = value; }
         }
-
 
         public string CurrentPath { get; set; }
 
@@ -46,6 +45,7 @@ namespace remote
         {
             return Directory.Exists(currentDirectory);
         }
+
         public bool FileExists(string currentDirectory)
         {
             return File.Exists(currentDirectory);
@@ -54,17 +54,14 @@ namespace remote
         public IList<string> GetFiles(string currentPath)
         {
             return Directory.GetFiles(currentPath);
-
         }
 
         public IList<string> GetDirectories(string currentPath)
         {
             return Directory.GetDirectories(currentPath);
-
         }
 
         public int SelectedIndex { get; set; }
-
 
         public bool OpenSelected()
         {
@@ -96,7 +93,7 @@ namespace remote
 
         public bool MoveOpenNextIfSameName()
         {
-            if (SelectedIndex < Files.Count-1)
+            if (SelectedIndex < Files.Count - 1)
             {
                 if (Compare(Files[SelectedIndex], Files[SelectedIndex + 1]) < 4)
                 {
@@ -118,6 +115,12 @@ namespace remote
             bool isDirectory = false;
             try
             {
+                if (currentPath.EndsWith(".link"))
+                {
+                    StreamReader sr = new StreamReader(currentPath);
+                    currentPath = sr.ReadToEnd();
+                    sr.Close();
+                }
 
                 Files = LoadFiles(currentPath);
                 isDirectory = true;
@@ -128,11 +131,9 @@ namespace remote
                 {
                     Properties.Settings.Default.Save();
                 });
-
             }
             catch (Exception e)
             {
-
             }
             if (!isDirectory)
             {
@@ -146,23 +147,21 @@ namespace remote
                     {
                         p.Kill();
                     }
-                   
 
-                        openFile = true;
-                        p = Process.Start(currentPath);
+                    openFile = true;
+                    p = Process.Start(currentPath);
 
-                        while (p != null && !p.HasExited && p.MainWindowHandle == (IntPtr)0)
-                        {
-                            Thread.Sleep(10);
-                        }
-                        //                        Actions.Player.SetFullScreen(p);
+                    while (p != null && !p.HasExited && p.MainWindowHandle == (IntPtr)0)
+                    {
+                        Thread.Sleep(10);
+                    }
+                    //                        Actions.Player.SetFullScreen(p);
                 }
                 CURRENTFILE = currentPath;
                 Properties.Settings.Default.currentfile = CURRENTFILE;
                 Task.Run(() =>
                 {
                     Properties.Settings.Default.Save();
-
                 });
             }
             CurrentPath = CURRENTDIRECTORY;
@@ -215,9 +214,9 @@ namespace remote
             int counter = 0;
             if (Math.Abs(nextFilename.Length - currentFile.Length) > 4)
                 return nextFilename.Length - currentFile.Length;
-            for (int i = 0; i < Math.Min(nextFilename.Length,currentFile.Length); i++)
+            for (int i = 0; i < Math.Min(nextFilename.Length, currentFile.Length); i++)
             {
-                if(nextFilename[i] == currentFile[i])
+                if (nextFilename[i] == currentFile[i])
                 {
                     counter++;
                 }
