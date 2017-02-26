@@ -30,6 +30,7 @@ namespace remote
         private string _currentTime;
         public IDispatcher MyDispatcher { get { return IocKernel.GetInstance<IDispatcher>(); } }
         private Timer timer;
+
         public Explorer()
         {
             timer = new Timer();
@@ -49,7 +50,6 @@ namespace remote
             if (Directory.CURRENTFILE != null)
                 SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(Directory.CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
 
-
             Files = Directory.OpenDirectory(CurrentPath);
             SelectedIndex = Directory.SelectedIndex;
             InitializeComponent();
@@ -67,8 +67,9 @@ namespace remote
         }
 
         public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
-       
-        IActions Actions { get { return IoC.IocKernel.GetInstance<IActions>(); } }
+
+        private IActions Actions
+        { get { return IoC.IocKernel.GetInstance<IActions>(); } }
 
         public ObservableCollection<string> Files
         {
@@ -97,8 +98,8 @@ namespace remote
         {
             Files = Directory.Files;
             SelectedIndex = Directory.SelectedIndex;
+            CurrentPath = Directory.CURRENTDIRECTORY;
         }
-
 
         public string CurrentTime
         {

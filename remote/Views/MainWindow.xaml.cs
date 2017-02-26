@@ -32,8 +32,10 @@ namespace remote
         private string _selectedCodes;
         private IList<ButtonCommands> _commands = new List<ButtonCommands>();
         public ButtonCommands Power { get; set; }
+
         private IActions Actions
         { get { return IoC.IocKernel.GetInstance<IActions>(); } }
+
         public ButtonCommands OkButton { get; set; }
         public ButtonCommands UpButton { get; set; }
 
@@ -176,7 +178,7 @@ namespace remote
 
         public List<ButtonCommands> Load()
         {
-            Directory.SetCurrentDirectory("F:\\github\\remote\\remote\\bin\\Debug");
+            Directory.SetCurrentDirectory("G:\\github\\remote\\remote\\bin\\Debug");
             var configvalue = "";
             {
                 using (var reader = new StreamReader("config.xml"))

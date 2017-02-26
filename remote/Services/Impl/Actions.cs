@@ -43,7 +43,7 @@ namespace remote
             {
                 lock (locker)
                 {
-                    if (!skipRequest)
+                    if (!skipRequest && Explorer == null)
                     {
                         PlayerStatus status = Player.GetStatus();
                         if (status == null)

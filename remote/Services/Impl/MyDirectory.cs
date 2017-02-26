@@ -172,7 +172,7 @@ namespace remote
         {
             var directories = Directory.GetDirectories(currentPath);
             var files = Directory.GetFiles(currentPath);
-            var Files = new ObservableCollection<string>();
+            var Files = new List<string>();
             Files.Add("..");
             foreach (var dir in directories)
             {
@@ -185,7 +185,24 @@ namespace remote
 
                 Files.Add(folders.Last());
             }
-            return Files;
+
+            Files.Sort(Sorter);
+
+            return new ObservableCollection<string>(Files);
+        }
+
+        private int Sorter(string a, string b)
+        {
+            if (a == "..")
+                return -1;
+            if (b == "..")
+                return 1;
+            if (b.Contains(".link"))
+                return 1;
+            if (a.Contains(".link"))
+                return -1;
+
+            return a.CompareTo(b);
         }
 
         public string NextFileIsFromList(string folder, string currentFile)
