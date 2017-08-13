@@ -15,6 +15,7 @@ namespace remote
         ObservableCollection<string> OpenDirectory(string currentPath);
         string CURRENTDIRECTORY { get; set; }
         string CURRENTFILE { get; set; }
+        string CurrentPath { get; set; }
         int SelectedIndex { get; set; }
         ObservableCollection<string> Files { get; set; }
         bool OpenSelected();

@@ -75,12 +75,13 @@ namespace remote
                 {
                     Dispatcher.BeginInvoke(() =>
                     {
-                        Explorer.CurrentPath = Directory.CURRENTFILE;
                         skipRequest = !Directory.OpenSelected();
+                        Explorer.CurrentPath = Directory.CurrentPath;
+
                         if (!skipRequest)
                             Explorer.Close();
                         else
-                            Explorer.Refresh();
+                            Refresh();
                         if (!timerThread.IsAlive)
                             timerThread.Start();
                     });
@@ -103,7 +104,7 @@ namespace remote
         {
             if (Explorer != null)
             {
-                Explorer.MoveUp();
+                MoveUp();
             }
             else
             {
@@ -118,7 +119,7 @@ namespace remote
         {
             if (Explorer != null)
             {
-                Explorer.MoveDown();
+                MoveDown();
             }
             else
             {
@@ -180,12 +181,35 @@ namespace remote
             {
                 Process.Kill(p);
             }
+
+            if (!Directory.Exists(Properties.Settings.Default.currentDirectory))
+                Directory.CURRENTDIRECTORY = null;
+            CurrentPath = Directory.CURRENTDIRECTORY ?? ConfigurationManager.AppSettings["defaultPath"];
+
+            if (!File.Exists(Properties.Settings.Default.currentfile))
+                Directory.CURRENTFILE = null;
+            else
+            {
+                Directory.CURRENTFILE = Properties.Settings.Default.currentfile;
+            }
+            var SelectedIndex = 0;
+            if (Directory.CURRENTFILE != null)
+                SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(Directory.CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
+
+            var Files = Directory.OpenDirectory(CurrentPath);
+            SelectedIndex = Directory.SelectedIndex;
+
             Dispatcher.Invoke(() =>
             {
                 if (Explorer != null)
                     Explorer.Close();
+
                 Explorer = new Explorer();
                 Explorer.Show();
+                Explorer.CurrentPath = Directory.CurrentPath;
+
+                Explorer.SelectedIndex = SelectedIndex;
+                Explorer.Files = Files;
                 Explorer.Closed += explorer_Closed;
                 Screen[] screens = Screen.AllScreens;
                 var x = screens[screenIndex].WorkingArea.X;
@@ -195,6 +219,31 @@ namespace remote
                 Explorer.WindowState = WindowState.Minimized;
                 Explorer.WindowState = WindowState.Maximized;
             });
+        }
+
+        public void Refresh()
+        {
+            Explorer.Files = Directory.Files;
+            Explorer.SelectedIndex = Directory.SelectedIndex;
+            CurrentPath = Directory.CURRENTDIRECTORY;
+        }
+
+        public void MoveUp()
+        {
+            if (Directory.SelectedIndex > 0)
+                Directory.SelectedIndex--;
+
+            Explorer.SelectedIndex = Directory.SelectedIndex;
+        }
+
+        public void MoveDown()
+        {
+            if (Directory.SelectedIndex < Explorer.Files.Count)
+            {
+                Directory.SelectedIndex++;
+            }
+            Explorer.SelectedIndex = Directory.SelectedIndex;
+
         }
 
         private void explorer_Closed(object sender, EventArgs e)

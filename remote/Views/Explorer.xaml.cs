@@ -37,21 +37,7 @@ namespace remote
             timer.Interval = 100;
             timer.Tick += Timer_Tick;
             timer.Start();
-            if (!Directory.Exists(Properties.Settings.Default.currentDirectory))
-                Directory.CURRENTDIRECTORY = null;
-            CurrentPath = Directory.CURRENTDIRECTORY ?? ConfigurationManager.AppSettings["defaultPath"];
-
-            if (!File.Exists(Properties.Settings.Default.currentfile))
-                Directory.CURRENTFILE = null;
-            else
-            {
-                Directory.CURRENTFILE = Properties.Settings.Default.currentfile;
-            }
-            if (Directory.CURRENTFILE != null)
-                SelectedIndex = new List<string>(Directory.GetFiles(CurrentPath)).IndexOf(Directory.CURRENTFILE) + 1 + Directory.GetDirectories(CurrentPath).Count;
-
-            Files = Directory.OpenDirectory(CurrentPath);
-            SelectedIndex = Directory.SelectedIndex;
+            
             InitializeComponent();
         }
 
@@ -66,7 +52,6 @@ namespace remote
             base.OnClosing(e);
         }
 
-        public IDirectory Directory { get { return IocKernel.GetInstance<IDirectory>(); } }
 
         private IActions Actions
         { get { return IoC.IocKernel.GetInstance<IActions>(); } }
@@ -84,22 +69,18 @@ namespace remote
 
         public int SelectedIndex
         {
-            get { return _selectedIndex; }
+       get {
+            return _selectedIndex;
+        }
             set
             {
                 if (value == _selectedIndex) return;
                 _selectedIndex = value;
                 OnPropertyChanged();
-                Directory.SelectedIndex = value;
             }
         }
 
-        public void Refresh()
-        {
-            Files = Directory.Files;
-            SelectedIndex = Directory.SelectedIndex;
-            CurrentPath = Directory.CURRENTDIRECTORY;
-        }
+        
 
         public string CurrentTime
         {
@@ -122,7 +103,7 @@ namespace remote
                 OnPropertyChanged();
             }
         }
-
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         [NotifyPropertyChangedInvocator]
@@ -132,26 +113,12 @@ namespace remote
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public void MoveUp()
-        {
-            if (SelectedIndex > 0)
-                SelectedIndex--;
-        }
-
-        public bool MoveDown()
-        {
-            if (SelectedIndex < Files.Count)
-            {
-                SelectedIndex++;
-                return true;
-            }
-            return false;
-        }
+        
 
         private void ScrollIntoView(object sender, SelectionChangedEventArgs e)
         {
-            if (Files.Count > SelectedIndex && SelectedIndex > -1)
-                ListView.ScrollIntoView(Files[SelectedIndex]);
+            if (Files.Count > _selectedIndex && _selectedIndex > -1)
+                ListView.ScrollIntoView(Files[_selectedIndex]);
         }
 
         private void ListView_OnMouseDoubleClick(object sender, MouseButtonEventArgs e)
